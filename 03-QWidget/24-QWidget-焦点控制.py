@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit
+from PyQt5.QtCore import Qt
 
 
 class Window(QWidget):
@@ -33,8 +34,8 @@ le3 = QLineEdit(window)
 le3.move(50, 150)
 
 # 是个静态方法，设置了子控件获取焦点的先后顺序
-QWidget.setTabOrder(le1, le3)
-QWidget.setTabOrder(le3, le2)
+QWidget.setTabOrder(le1, le3)  # le1获取焦点后，le3获取下个焦点
+QWidget.setTabOrder(le3, le2)  # le3获取焦点后，le2获取下个焦点
 
 # le2.setFocus()  # 设置获得焦点
 # le2.clearFocus()  # 清空获得的焦点

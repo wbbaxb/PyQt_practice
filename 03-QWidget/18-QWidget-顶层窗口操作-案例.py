@@ -1,8 +1,9 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.Qt import *
-
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 """案例：创建一个无边框、半透明的窗口；自定义关闭、最大化、最小化三个按钮；实现能够点击用户区域拖动窗口"""
 
 
@@ -12,7 +13,7 @@ class Window(QWidget):
         self.setWindowFlags(Qt.FramelessWindowHint)  # 设置了无边框的Flag
         self.setWindowOpacity(0.85)  # 设置不透明度
         self.setWindowTitle("顶层窗口操作-案例")
-        self.setWindowIcon(QIcon("../Icons/snowflake_128px.ico"))
+        self.setWindowIcon(QIcon("./Icons/snowflake_128px.ico"))
         self.resize(500, 500)
         self.move(400, 240)
         # 公共数据 （通过保存为 self的属性来实现跨方法使用）
@@ -26,19 +27,19 @@ class Window(QWidget):
         """在窗口的右上角添加关闭、最大化、最小化 三个按钮。注意三个按钮的位置没有在本方法中确定"""
         close_btn = QPushButton(self)
         self.close_btn = close_btn  # 通过把局部变量存储为对象属性来实现跨方法使用
-        close_btn.setIcon(QIcon("../Icons/cross_48px.ico"))
+        close_btn.setIcon(QIcon("./Icons/cross_48px.ico"))
         # close_btn.setText("关闭")
         close_btn.resize(self.btn_w, self.btn_h)
 
         max_btn = QPushButton(self)
         self.max_btn = max_btn  # 通过把局部变量存储为对象属性来实现跨方法使用
-        max_btn.setIcon(QIcon("../Icons/expand_48px.ico"))
+        max_btn.setIcon(QIcon("./Icons/expand_48px.ico"))
         # max_btn.setText("最大化")
         max_btn.resize(self.btn_w, self.btn_h)
 
         mini_btn = QPushButton(self)
         self.mini_btn = mini_btn  # 通过把局部变量存储为对象属性来实现跨方法使用
-        mini_btn.setIcon(QIcon("../Icons/minus_48px.ico"))
+        mini_btn.setIcon(QIcon("./Icons/minus_48px.ico"))
         # mini_btn.setText("最小化")
         mini_btn.resize(self.btn_w, self.btn_h)
 
@@ -49,7 +50,7 @@ class Window(QWidget):
         def max_normal():
             """最大化/恢复 按钮的槽函数"""
             if self.isMaximized():
-                max_btn.setIcon(QIcon("../Icons/expand_48px.ico"))
+                max_btn.setIcon(QIcon("./Icons/expand_48px.ico"))
                 self.label.setText("Hello World")
                 self.label.setStyleSheet("font-size: 30px;")
                 self.label.adjustSize()
@@ -59,7 +60,7 @@ class Window(QWidget):
                 self.label.setStyleSheet("font-size: 40px;")
                 self.label.adjustSize()
                 self.showMaximized()
-                max_btn.setIcon(QIcon("../Icons/contract_48px.ico"))
+                max_btn.setIcon(QIcon("./Icons/contract_48px.ico"))
 
         max_btn.pressed.connect(max_normal)
 

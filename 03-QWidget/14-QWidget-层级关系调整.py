@@ -1,23 +1,19 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 
 
 class MyLabel(QLabel):
     """重写QLabel的mousePressEvent方法以实现点击谁就把谁放到顶层"""
 
     def mousePressEvent(self, ev: QtGui.QMouseEvent) -> None:
-        self.raise_()
+        self.raise_()  # 将控件提升到顶层
 
 
-# 1. 创建一个应用程序对象
 app = QApplication(sys.argv)
 
-# 2.控件的操作
-# 2.1创建控件
 window = QWidget()
-# 2.2设置控件
 
 window.setWindowTitle("QWidget层级关系调整")
 window.resize(500, 500)
@@ -39,8 +35,6 @@ label2.setStyleSheet("background-color: green;")
 # label1.raise_()
 # label2.stackUnder(label1)
 
-# 2.3展示控件
 window.show()
 
-# 3.应用程序的执行， 进入到消息循环
 sys.exit(app.exec_())
