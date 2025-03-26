@@ -1,7 +1,8 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtCore import Qt
 
 """鼠标可以在用户区域内实现对整个窗口的拖动。（原先只能拖动标题栏时移动）"""
 
@@ -13,10 +14,6 @@ class Window(QWidget):
         self.resize(500, 500)
         self.move(400, 250)
         self.move_flag = False  # 设置一个标记，确保只有在执行mousePressEvent之后才会执行mouseMoveEvent
-        self.setup_ui()
-
-    def setup_ui(self):
-        pass
 
     def mousePressEvent(self, evt):
         # print("鼠标按下")

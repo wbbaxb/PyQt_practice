@@ -1,10 +1,10 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel
 
 
 class Window(QWidget):
-    """自定义的窗口类，继承自QWidget"""
+    """自定义窗口类,继承自QWidget"""
 
     def __init__(self):
         super().__init__()  # 进行父类的初始化
@@ -21,8 +21,8 @@ class Window(QWidget):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    window = Window()  # 实例化一个Window对象
-    window.setup_ui()  # 调用setup_ui方法，设置窗口内所有的子控件
-    window.show()  # 把window显示出来
+    window = Window()  
+    window.setup_ui() 
+    window.show() 
 
     sys.exit(app.exec_())

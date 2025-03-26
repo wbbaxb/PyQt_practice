@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget
 
 """
 QWidget
@@ -18,14 +18,15 @@ window = QWidget()
 window.resize(500, 500)
 
 red = QWidget(window)
-red.resize(100, 100)
+red.resize(200, 200) # 设置控件大小
 red.setStyleSheet("background-color: red;")
-red.move(300, 0)
+red.move(0, 0) # 设置控件位置
 
 green = QWidget(window)
-green.resize(100, 100)
+green.resize(100, 100) # 设置控件大小
 green.setStyleSheet("background-color: green;")
-green.move(300, 50)  # 体现QWidget沿z轴绘制，后面的控件可以覆盖前面的控件
+green.move(0, 100)  # 体现QWidget沿z轴绘制，后面的控件可以覆盖前面的控件
+# 当green被创建后，会覆盖red一部分，因为green的z轴顺序在red之后
 
 window.show()
 # 3.应用程序的执行， 进入到消息循环
