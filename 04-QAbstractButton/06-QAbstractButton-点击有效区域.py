@@ -1,7 +1,8 @@
 import sys
 
 from PyQt5 import QtGui
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton
+from PyQt5.QtGui import QPainter, QPen, QColor
 
 app = QApplication(sys.argv)
 

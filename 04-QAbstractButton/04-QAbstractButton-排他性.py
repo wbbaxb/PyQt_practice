@@ -1,6 +1,5 @@
 import sys
-
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QCheckBox
 
 """
 QPushButton 默认无排他性
@@ -18,16 +17,15 @@ window.move(400, 250)
 for i in range(3):
     btn = QCheckBox(window)
     btn.setText(f"btn{i}")
-    btn.move(50 * i, 50 * i)
+    btn.move(50 * i, 200)
 
+    # QCheckBox 默认无排他性，设置为有排他性后，可以被其他按钮影响
     btn.setAutoExclusive(True)  # 设置排他性
-    print(btn.autoExclusive())
-    # btn.setCheckable(True)
+    print(btn.autoExclusive())  # 获取排他性,True
 
-btn = QPushButton(window)
-btn.setText("btn3")
-btn.move(250, 250)
-btn.setCheckable(True)  # btn3 没有设置排他性，不受btn0~2的影响，可以自由被选中
+btn = QCheckBox(window)
+btn.setText("btn3不受影响")
+btn.move(200, 200)
 
 window.show()
 
