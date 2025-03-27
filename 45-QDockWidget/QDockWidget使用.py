@@ -11,6 +11,7 @@ from flowLayout import FlowLayout
 class AnnotationTool(QMainWindow):
     def __init__(self):
         super().__init__()
+
         self.attributes_list = []
         self.load_attributes()  # 加载属性
 
@@ -18,11 +19,15 @@ class AnnotationTool(QMainWindow):
             print("属性为空,请检查attributes.json文件")
             return
 
+        self.image_attribute_dict = {}
+        self.image_attribute_path = Path(__file__).parent / "舌图.json"
+        self.load_image_attribute()
+
         self.setup_ui()
 
     def load_attributes(self):
         """
-        加载属性
+        加载属性文件
         """
         path = Path(__file__).parent / "attributes.json"
 
@@ -45,6 +50,36 @@ class AnnotationTool(QMainWindow):
                 }
 
                 self.attributes_list.append(dict_attribute)
+
+    def load_image_attribute(self):
+        """
+        加载图片属性文件
+        """
+
+        if not self.image_attribute_path.exists():
+            print(f"图片标注文件不存在: {self.image_attribute_path}")
+            return
+
+        with open(self.image_attribute_path, "r", encoding="utf-8") as f:
+            image_data = json.load(f)
+
+            shapes = image_data.get("shapes", [])
+
+            if not shapes:
+                return
+
+            attributes = shapes[0].get("attributes", {})
+
+            print(type(attributes))
+
+            if not attributes:
+                return
+
+            for key, val in attributes.items():
+                if isinstance(val, str):
+                    self.image_attribute_dict[key] = [val]
+                elif isinstance(val, list):
+                    self.image_attribute_dict[key] = val
 
     def setup_ui(self):
         """
