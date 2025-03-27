@@ -1,15 +1,50 @@
 
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QScrollArea, QWidget, QPushButton,
-                             QVBoxLayout, QGroupBox, QCheckBox, QLabel, QApplication)
+                             QVBoxLayout, QGroupBox, QCheckBox, QLabel, QApplication, QHBoxLayout)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 import sys
+import json
+from pathlib import Path
 
 
 class AnnotationTool(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.attributes_list = []
+        self.load_attributes()  # 加载属性
+
+        if not self.attributes_list:
+            print("属性为空,请检查attributes.json文件")
+            return
+
         self.setup_ui()
+
+    def load_attributes(self):
+        """
+        加载属性
+        """
+        path = Path(__file__).parent / "attributes.json"
+
+        if not path.exists():
+            print(f"文件不存在: {path}")
+            return []
+
+        with open(path, "r", encoding="utf-8") as f:
+            attributes = json.load(f)
+
+            if not attributes:
+                return []
+
+            attribute_types = attributes.get("舌头", {})
+
+            for attribute_type, attribute_options in attribute_types.items():
+                dict_attribute = {
+                    'name': attribute_type,
+                    'options': attribute_options
+                }
+
+                self.attributes_list.append(dict_attribute)
 
     def setup_ui(self):
         """
@@ -41,16 +76,20 @@ class AnnotationTool(QMainWindow):
         # 滚动区域容器
         scroll = QScrollArea()
         content = QWidget()
-        layout = QVBoxLayout(content)
+        main_layout = QVBoxLayout(content)
 
-        # 示例属性组：颜色
-        group_color = QGroupBox("颜色")
-        color_layout = QVBoxLayout()
-        color_layout.addWidget(QCheckBox("红"))
-        color_layout.addWidget(QCheckBox("绿"))
-        color_layout.addWidget(QCheckBox("蓝"))
-        group_color.setLayout(color_layout)
-        layout.addWidget(group_color)
+        for attribute in self.attributes_list:
+            group_box = QGroupBox(attribute['name'])
+            h_layout = QHBoxLayout()
+            h_layout.setAlignment(Qt.AlignLeft)
+
+            for option in attribute['options']:
+                check_box = QCheckBox(option)
+                check_box.setCursor(Qt.PointingHandCursor)
+                h_layout.addWidget(check_box)
+                group_box.setLayout(h_layout)
+
+            main_layout.addWidget(group_box)
 
         scroll.setWidget(content)  # 设置滚动区域的部件为content
         scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
