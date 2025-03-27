@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QScrollArea, QWidget, QPushButton,
                              QVBoxLayout, QGroupBox, QCheckBox, QLabel, QApplication)
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
 import sys
 import json
 from pathlib import Path
@@ -12,10 +11,10 @@ class AnnotationTool(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.attributes_list = []
+        self.attributes = {}  # 属性列表
         self.load_attributes()  # 加载属性
 
-        if not self.attributes_list:
+        if not self.attributes:
             print("属性为空,请检查attributes.json文件")
             return
 
@@ -39,17 +38,15 @@ class AnnotationTool(QMainWindow):
             attributes = json.load(f)
 
             if not attributes:
-                return []
+                return {}
 
-            attribute_types = attributes.get("舌头", {})
+            keys = list(attributes.keys())
+            key = keys[0] if keys else []
 
-            for attribute_type, attribute_options in attribute_types.items():
-                dict_attribute = {
-                    'name': attribute_type,
-                    'options': attribute_options
-                }
+            if not key:
+                return {}
 
-                self.attributes_list.append(dict_attribute)
+            self.attributes = attributes.get(key, {})
 
     def load_image_attribute(self):
         """
@@ -107,8 +104,9 @@ class AnnotationTool(QMainWindow):
         # 设置垂直布局的间距
         v_layout.setSpacing(30)
 
-        for attribute in self.attributes_list:
-            group_box = QGroupBox(attribute['name'])
+        # 遍历self.attributes字典
+        for key, val in self.attributes.items():
+            group_box = QGroupBox(key)
 
             group_box.setStyleSheet("""
                 QGroupBox {
@@ -130,7 +128,7 @@ class AnnotationTool(QMainWindow):
             flow_layout = FlowLayout(spacing=20)
 
             # 添加选项
-            for option in attribute['options']:
+            for option in val:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
                 check_box.setStyleSheet("""
@@ -141,13 +139,11 @@ class AnnotationTool(QMainWindow):
                 """)
 
                 # 设置属性存储分类名称和选项名称
-                check_box.setProperty("attribute_type", attribute['name'])
+                check_box.setProperty("attribute_type", key)
                 check_box.setProperty("option_name", option)
 
-                attribute_type = attribute['name']
-
-                if attribute_type in self.image_attribute_dict:
-                    if option in self.image_attribute_dict[attribute_type]:
+                if key in self.image_attribute_dict:
+                    if option in self.image_attribute_dict[key]:
                         check_box.setChecked(True)
 
                 check_box.toggled.connect(self.check_box_toggled)
@@ -181,7 +177,7 @@ class AnnotationTool(QMainWindow):
 
         if not self.image_attribute_dict or not self.image_attribute_dict[attribute_type]:
             return
-        
+
         if value:
             if option_name not in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].append(option_name)
@@ -197,7 +193,7 @@ class AnnotationTool(QMainWindow):
         """
         if not self.image_attribute_path.exists():
             return
-            
+
         try:
             # 读取当前的JSON文件
             with open(self.image_attribute_path, "r", encoding="utf-8") as f:
@@ -207,13 +203,13 @@ class AnnotationTool(QMainWindow):
 
                 if not shapes:
                     return
-                
+
                 shapes[0]["attributes"] = self.image_attribute_dict
 
             # 将更新后的数据写回文件
             with open(self.image_attribute_path, "w", encoding="utf-8") as f:
                 json.dump(image_data, f, ensure_ascii=False, indent=2)
-                            
+
         except Exception as e:
             print(f"保存舌图属性时出错: {str(e)}")
 
