@@ -84,7 +84,7 @@ class FlowLayout(QLayout):
                     item_j = self._items[j]
                     widget_j = item_j.widget()
                     item_j_height = widget_j.sizeHint().height()
-                    y_offset = (current_line_height - item_j_height) // 2 + 5 # 垂直居中关键计算
+                    y_offset = (current_line_height - item_j_height) // 2 + 3 # 垂直居中关键计算
                     
                     if not test_only:
                         pos = QPoint(item_j.geometry().x(), y + y_offset)
@@ -109,7 +109,7 @@ class FlowLayout(QLayout):
             item_j = self._items[j]
             widget_j = item_j.widget()
             item_j_height = widget_j.sizeHint().height()
-            y_offset = (current_line_height - item_j_height) // 2 + 5 # 垂直居中关键计算
+            y_offset = (current_line_height - item_j_height) // 2 + 3 # 垂直居中关键计算
             
             if not test_only:
                 pos = QPoint(item_j.geometry().x(), y + y_offset)
@@ -187,21 +187,20 @@ class AnnotationTool(QMainWindow):
             group_box = QGroupBox(attribute['name'])
 
             group_box.setStyleSheet("""
-            QGroupBox {
-                font-size: 15px;
-                border: 1px solid lightblue;
-                border-radius: 3px;
-                margin-top: 20px;
-                padding: 20px 10px;  /* 增加垂直和水平内边距 */
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 3px;
-                background-color: lightblue;
-                border-radius: 2px;
-            }
-        """)
+                QGroupBox {
+                    font-size: 15px;
+                    border: 1px solid lightblue;
+                    border-radius: 3px;
+                    margin-top: 20px;
+                    padding: 20px 10px;  /* 增加垂直和水平内边距 */
+                }
+                QGroupBox::title {
+                    left: 0;
+                    padding: 0;
+                    background-color: lightblue;
+                    border-radius: 2px;
+                }
+            """)
             
             # 使用自定义的流式布局
             flow_layout = FlowLayout(spacing=20)
