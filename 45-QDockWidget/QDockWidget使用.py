@@ -70,18 +70,15 @@ class AnnotationTool(QMainWindow):
 
             attributes = shapes[0].get("attributes", {})
 
-            print(type(attributes))
-
             if not attributes:
                 return
 
+            # 为了兼容之前标注过的舌图JSON文件,处理字符串或者列表
             for key, val in attributes.items():
                 if isinstance(val, str):
                     self.image_attribute_dict[key] = [val]
                 elif isinstance(val, list):
                     self.image_attribute_dict[key] = val
-
-        print(self.image_attribute_dict)
 
     def setup_ui(self):
         """
@@ -97,7 +94,7 @@ class AnnotationTool(QMainWindow):
         """
         # 创建停靠属性面板,第一个参数是停靠窗口的标题，第二个参数是停靠窗口的父窗口
         self.dock = QDockWidget("属性设置", self)
-        self.dock.setMinimumWidth(200)  # 设置最小宽度
+        self.dock.setMinimumWidth(400)  # 设置最小宽度
         self.dock.setMinimumHeight(200)  # 设置最小高度
 
         # 第一个参数是停靠窗口的位置，第二个参数是停靠窗口（QDockWidget对象）
@@ -181,7 +178,6 @@ class AnnotationTool(QMainWindow):
         """
         更新属性列表
         """
-        print(f"复选框状态变化: 分类[{attribute_type}] 选项[{option_name}] 状态[{value}]")
 
         if not self.image_attribute_dict or not self.image_attribute_dict[attribute_type]:
             return
@@ -193,7 +189,33 @@ class AnnotationTool(QMainWindow):
             if option_name in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].remove(option_name)
 
-        print(self.image_attribute_dict)
+        self.save_image_attribute()
+
+    def save_image_attribute(self):
+        """
+        保存图片属性到舌图JSON文件
+        """
+        if not self.image_attribute_path.exists():
+            return
+            
+        try:
+            # 读取当前的JSON文件
+            with open(self.image_attribute_path, "r", encoding="utf-8") as f:
+                image_data = json.load(f)
+
+                shapes = image_data.get("shapes", [])
+
+                if not shapes:
+                    return
+                
+                shapes[0]["attributes"] = self.image_attribute_dict
+
+            # 将更新后的数据写回文件
+            with open(self.image_attribute_path, "w", encoding="utf-8") as f:
+                json.dump(image_data, f, ensure_ascii=False, indent=2)
+                            
+        except Exception as e:
+            print(f"保存舌图属性时出错: {str(e)}")
 
     def set_main_layout(self):
         """
@@ -258,17 +280,17 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    window.resize(800, 600)
-    window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-    window.setWindowTitle("QDockWidget Demo")
+    # window.resize(800, 600)
+    # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
+    # window.setWindowTitle("QDockWidget Demo")
 
     # 移动窗口到屏幕中心
-    screen = QApplication.primaryScreen()
-    center_point = screen.availableGeometry().center()
-    x = int(center_point.x() - window.width() / 2)
-    y = int(center_point.y() - window.height() / 2)
-    window.move(x, y)
+    # screen = QApplication.primaryScreen()
+    # center_point = screen.availableGeometry().center()
+    # x = int(center_point.x() - window.width() / 2)
+    # y = int(center_point.y() - window.height() / 2)
+    # window.move(x, y)
 
-    window.show()
+    window.showMaximized()
 
     sys.exit(app.exec_())
