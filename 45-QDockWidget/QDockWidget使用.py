@@ -81,6 +81,8 @@ class AnnotationTool(QMainWindow):
                 elif isinstance(val, list):
                     self.image_attribute_dict[key] = val
 
+        print(self.image_attribute_dict)
+
     def setup_ui(self):
         """
         初始化UI
@@ -145,6 +147,12 @@ class AnnotationTool(QMainWindow):
                 check_box.setProperty("attribute_type", attribute['name'])
                 check_box.setProperty("option_name", option)
 
+                attribute_type = attribute['name']
+
+                if attribute_type in self.image_attribute_dict:
+                    if option in self.image_attribute_dict[attribute_type]:
+                        check_box.setChecked(True)
+
                 check_box.toggled.connect(self.check_box_toggled)
                 flow_layout.addWidget(check_box)
 
@@ -174,6 +182,18 @@ class AnnotationTool(QMainWindow):
         更新属性列表
         """
         print(f"复选框状态变化: 分类[{attribute_type}] 选项[{option_name}] 状态[{value}]")
+
+        if not self.image_attribute_dict or not self.image_attribute_dict[attribute_type]:
+            return
+        
+        if value:
+            if option_name not in self.image_attribute_dict[attribute_type]:
+                self.image_attribute_dict[attribute_type].append(option_name)
+        else:
+            if option_name in self.image_attribute_dict[attribute_type]:
+                self.image_attribute_dict[attribute_type].remove(option_name)
+
+        print(self.image_attribute_dict)
 
     def set_main_layout(self):
         """
