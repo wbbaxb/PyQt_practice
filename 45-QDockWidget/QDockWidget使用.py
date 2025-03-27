@@ -1,4 +1,3 @@
-
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QScrollArea, QWidget, QPushButton,
                              QVBoxLayout, QGroupBox, QCheckBox, QLabel, QApplication, QHBoxLayout)
 from PyQt5.QtCore import Qt
@@ -63,33 +62,54 @@ class AnnotationTool(QMainWindow):
         self.dock.setMinimumWidth(200)  # 设置最小宽度
         self.dock.setMinimumHeight(200)  # 设置最小高度
 
-        # 设置样式表
-        self.dock.setStyleSheet("""
-            QWidget {
-                background-color: #ffcccc;  /* 内容区域背景色 */
-            }
-        """)
-
         # 第一个参数是停靠窗口的位置，第二个参数是停靠窗口（QDockWidget对象）
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock)
 
         # 滚动区域容器
         scroll = QScrollArea()
         content = QWidget()
-        main_layout = QVBoxLayout(content)
-
+        v_layout = QVBoxLayout(content) # 设置垂直布局
+        # 设置垂直布局的间距
+        v_layout.setSpacing(30)
+ 
         for attribute in self.attributes_list:
             group_box = QGroupBox(attribute['name'])
+
+            group_box.setStyleSheet("""
+                QGroupBox {
+                    font-size: 15px;
+                    border: 1px solid lightblue;
+                    border-radius: 3px;
+                    margin-top: 20px; /* 标题与内容的间距 */
+                }
+                
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    background-color: lightblue;
+                    border-radius: 2px;
+                }
+            """)
+            
             h_layout = QHBoxLayout()
             h_layout.setAlignment(Qt.AlignLeft)
+
+            # 设置横向布局的间距
+            h_layout.setSpacing(20)
 
             for option in attribute['options']:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
+                check_box.setStyleSheet("""
+                    QCheckBox {
+                        font-size: 15px;
+                        color: #000000;
+                    }
+                """)
+                
                 h_layout.addWidget(check_box)
                 group_box.setLayout(h_layout)
 
-            main_layout.addWidget(group_box)
+            v_layout.addWidget(group_box)
 
         scroll.setWidget(content)  # 设置滚动区域的部件为content
         scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
