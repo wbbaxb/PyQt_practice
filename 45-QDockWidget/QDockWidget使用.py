@@ -175,9 +175,12 @@ class AnnotationTool(QMainWindow):
         更新属性列表
         """
 
-        if not self.image_attribute_dict or not self.image_attribute_dict[attribute_type]:
-            return
-
+        if not self.image_attribute_dict:
+            self.image_attribute_dict = {}
+        
+        if attribute_type not in self.image_attribute_dict:
+            self.image_attribute_dict[attribute_type] = []
+        
         if value:
             if option_name not in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].append(option_name)
