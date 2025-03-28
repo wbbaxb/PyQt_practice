@@ -73,10 +73,19 @@ class AnnotationTool(QMainWindow):
             # 为了兼容之前标注过的舌图JSON文件,处理字符串或者列表
             for key, val in attributes.items():
                 if isinstance(val, str):
-                    self.image_attribute_dict[key] = [val]
+                    if val:
+                        self.image_attribute_dict[key] = [val]
+                    else:
+                        self.image_attribute_dict[key] = ['unknown']
                 elif isinstance(val, list):
                     self.image_attribute_dict[key] = val
 
+                    # 如果是空列表，设置为["unknown"]
+                    if not val:
+                        self.image_attribute_dict[key] = ["unknown"]
+                    else:
+                        self.image_attribute_dict[key] = val
+                        
     def setup_ui(self):
         """
         初始化UI
@@ -131,11 +140,15 @@ class AnnotationTool(QMainWindow):
             for option in val:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
-                check_box.setStyleSheet("""
-                    QCheckBox {
+
+                color = 'red' if option == 'unknown' else '#000000'
+
+                # 设置复选框的样式
+                check_box.setStyleSheet(f"""
+                    QCheckBox {{
                         font-size: 15px;
-                        color: #000000;
-                    }
+                        color: {color};
+                    }}
                 """)
 
                 # 设置属性存储分类名称和选项名称
@@ -161,14 +174,51 @@ class AnnotationTool(QMainWindow):
         """
         复选框状态变化时触发
         """
-
         sender = self.sender()  # 获取发送信号的复选框对象
 
         if sender:
             # 获取存储在复选框属性中的分类和选项名称
             attribute_type = sender.property("attribute_type")
             option_name = sender.property("option_name")
+            
+            # 增加互斥逻辑
+            if value:  # 当选中某个选项时
+                # 如果选中的是 "unknown"，则取消同组中其他选项
+                if option_name == "unknown":
+                    self.clear_other_options(attribute_type, "unknown")
+                # 如果选中的不是 "unknown"，则取消同组中的 "unknown" 选项
+                else:
+                    self.clear_option(attribute_type, "unknown")
+                
             self.update_attribute_list(attribute_type, option_name, value)
+
+    def clear_other_options(self, attribute_type, except_option):
+        """
+        清除同一组中除了指定选项外的所有选项
+        """
+        # 查找所有带有相同 attribute_type 属性的复选框
+        for child in self.findChildren(QCheckBox): # 获取当前窗口中所有复选框
+            if (child.property("attribute_type") == attribute_type and child.property("option_name") != except_option and child.isChecked()):
+                # 暂时断开信号连接，防止触发 toggled 信号引起循环
+                child.blockSignals(True)
+                child.setChecked(False)
+                child.blockSignals(False)
+                # 更新属性列表
+                self.update_attribute_list(attribute_type, child.property("option_name"), False)
+
+    def clear_option(self, attribute_type, option_name):
+        """
+        清除指定组中的指定选项
+        """
+        # 查找特定的复选框
+        for child in self.findChildren(QCheckBox): # 获取当前窗口中所有复选框
+            if (child.property("attribute_type") == attribute_type and child.property("option_name") == option_name and child.isChecked()):
+                # 暂时断开信号连接，防止触发 toggled 信号引起循环
+                child.blockSignals(True)
+                child.setChecked(False)
+                child.blockSignals(False)
+                # 更新属性列表
+                self.update_attribute_list(attribute_type, option_name, False)
 
     def update_attribute_list(self, attribute_type, option_name, value):
         """
@@ -187,6 +237,20 @@ class AnnotationTool(QMainWindow):
         else:
             if option_name in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].remove(option_name)
+                
+                # 如果移除后该属性组没有任何选项，则自动选中unknown选项
+                if not self.image_attribute_dict[attribute_type] and option_name != "unknown":
+                    # 查找unknown复选框并选中它
+                    for child in self.findChildren(QCheckBox):
+                        if (child.property("attribute_type") == attribute_type and 
+                            child.property("option_name") == "unknown"):
+                            # 阻止信号以避免递归
+                            child.blockSignals(True)
+                            child.setChecked(True)
+                            child.blockSignals(False)
+                            # 更新属性列表
+                            self.image_attribute_dict[attribute_type].append("unknown")
+                            break
 
         self.save_image_attribute()
 
