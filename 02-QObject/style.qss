@@ -1,0 +1,55 @@
+/* 标签样式 */
+QLabel {
+    font-size: 40px;
+    color: #2c3e50;
+    background-color: #ecf0f1;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+}
+
+/* 按钮基本样式 */
+QPushButton {
+    font-size: 30px;
+    color: white;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 5px;
+}
+
+/* 按钮悬停效果 */
+QPushButton:hover {
+    background-color: #2980b9;
+}
+
+/* 按钮按下效果 */
+QPushButton:pressed {
+    background-color: #1c6ea4;
+}
+
+/* 每个按钮使用不同颜色 */
+QPushButton#name_btn { 
+    background-color: #e74c3c; 
+}
+
+QPushButton#connect_btn {
+    background-color: #2ecc71;
+}
+
+QPushButton#disconnect_btn {
+    background-color: #f39c12;
+}
+
+QPushButton#block_btn {
+    background-color: #9b59b6;
+}
+
+QPushButton#unblock_btn {
+    background-color: #1abc9c;
+}
+
+QPushButton#destroy_btn {
+    background-color: #34495e;
+} 

@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 
 
 class Window(QWidget):
@@ -21,16 +21,33 @@ class Window(QWidget):
 
         label2 = QLabel(self)
         label2.setText("这是label2")
-        label2.move(200, 100)
+        label2.move(100, 300)
 
         btn = QPushButton(self)
-        btn.setText("点我")
-        btn.move(100, 200)
+        btn.setText("Test")
+        # 不可以一次连接多个槽函数
+        # btn.clicked.connect(self.child_all_label,self.child_all_label2)
+        btn.clicked.connect(self.child_all_label)
+        btn.clicked.connect(self.child_all_label2)
 
-        for widget in self.children():
-            if widget.inherits("QLabel"):
-                # print(widget, "是")
-                widget.setStyleSheet("background-color: cyan;")
+        btn.move(100, 450)
+
+    def child_all_label(self):
+        """
+        使用findChildren方法查找所有QLabel控件
+        """
+        for label in self.findChildren(QLabel):
+            name = label.text()
+            label.setText(f"new-{name}")
+
+    def child_all_label2(self):
+        """
+        使用children方法查找所有QLabel控件
+        """
+        for item in self.children():
+            if isinstance(item, QLabel):
+                item.setStyleSheet("background-color: red;font-size: 30px;")
+                item.adjustSize()  # 自适应内容,需要先设置文本和样式后,再调用
 
 
 if __name__ == "__main__":
