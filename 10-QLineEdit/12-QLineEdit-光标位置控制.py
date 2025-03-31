@@ -1,44 +1,74 @@
 import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton, QLabel, QVBoxLayout
+from PyQt5.QtCore import QPoint
 
-from PyQt5.Qt import *
-
-# 1. 创建一个应用程序对象
 app = QApplication(sys.argv)
 
-# 2.控件的操作
-# 2.1创建控件
 window = QWidget()
-# 2.2设置控件
-
 window.setWindowTitle("QLineEdit-光标位置控制")
-window.resize(500, 500)
+window.resize(400, 300)
 window.move(400, 250)
 
-le = QLineEdit(window)
-le.move(100, 100)
 
-btn = QPushButton("按钮", window)
-btn.move(100, 200)
-
-
-def cursor_move():
-    # le.cursorBackward(False, 2)  # 光标向后移动，不选中，步长为2
-    # le.cursorBackward(True, 2)  # 光标向后移动，选中文本，步长为2
-    # le.cursorForward(False, 2)  # 光标向前移动
-    # le.cursorWordBackward(True)  # 向后移动一个单词的长度
-    # le.cursorWordForward(True)  # 向后移动一个单词的长度
-    # le.home(False)  # 移动光标到行首
-    # le.end(False)  # 移动光标到行尾
-    # le.setCursorPosition(int(len(le.text()) / 2))  # 移动光标到行中
-    # print(le.cursorPosition())
-    print(le.cursorPositionAt(QPoint(55, 5)))  # 获取这一点坐标的字符，在字符串中的位置
-    le.setFocus()
+def move_cursor_to_end():
+    label.end(False)
+    label.setFocus()
 
 
-btn.clicked.connect(cursor_move)
+def move_cursor_to_start():
+    label.home(False)
+    label.setFocus()
 
-# 2.3展示控件
+
+def get_cursor_position():
+    message.setText(f"光标位置: {label.cursorPosition()}")
+    label.setFocus()
+
+
+label = QLineEdit('BillTest')
+message = QLabel()
+message.setFixedHeight(30)
+
+btn_get_position = QPushButton("获取光标位置")
+btn_get_position.clicked.connect(get_cursor_position)
+
+btn_move_cursor_to_start = QPushButton("移动光标到行首")
+btn_move_cursor_to_start.clicked.connect(move_cursor_to_start)
+
+btn_move_cursor_to_end = QPushButton("移动光标到行尾")
+btn_move_cursor_to_end.clicked.connect(move_cursor_to_end)
+
+# 创建父容器
+container = QWidget()
+container_layout = QVBoxLayout()
+container_layout.setSpacing(3)  # 设置父容器内部组件的间距
+container.setLayout(container_layout)
+
+# 将组件添加到父容器中
+container_layout.addWidget(label)
+container_layout.addWidget(message)
+container_layout.addWidget(btn_get_position)
+container_layout.addWidget(btn_move_cursor_to_start)
+container_layout.addWidget(btn_move_cursor_to_end)
+
+# 设置父容器的样式 (你可以根据需要修改)
+container.setStyleSheet("""
+    QWidget {
+        background-color: #f0f0f0; /* 设置背景颜色 */
+        border: 1px solid #ccc;      /* 设置边框 */
+        border-radius: 3px;           /* 设置圆角 */
+        padding: 5px;                /* 设置内边距 */
+    }
+    QPushButton {
+        margin-top: 5px;             /* 设置按钮的上边距 */
+    }
+""")
+
+main_layout = QVBoxLayout()
+window.setLayout(main_layout)
+
+# 将父容器添加到主布局中
+main_layout.addWidget(container)
+
 window.show()
-
-# 3.应用程序的执行， 进入到消息循环
 sys.exit(app.exec_())

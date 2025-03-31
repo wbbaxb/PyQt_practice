@@ -1,15 +1,17 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QLineEdit, QPushButton
 
-# 1. 创建一个应用程序对象
+"""
+QLineEdit 的文本修改状态
+当文本内容被编辑后（即使编辑后的内容与编辑前的内容相同，比如输入'123'，再删除'123'）isModified() 方法返回 True
+
+setModified(bool) 方法用于设置 QLineEdit 的文本修改状态。
+
+"""
+
 app = QApplication(sys.argv)
-
-# 2.控件的操作
-# 2.1创建控件
 window = QWidget()
-# 2.2设置控件
-
 window.setWindowTitle("QLineEdit-文本修改状态")
 window.resize(500, 500)
 window.move(400, 250)
@@ -26,8 +28,6 @@ btn = QPushButton("显示", window)
 btn.move(200, 0)
 btn.clicked.connect(cao)
 
-# 2.3展示控件
 window.show()
 
-# 3.应用程序的执行， 进入到消息循环
 sys.exit(app.exec_())
