@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QToolButton, QMenu, QAction
+from PyQt5.QtGui import QIcon
 
 app = QApplication(sys.argv)
 
@@ -12,11 +13,12 @@ window.move(400, 250)
 tb = QToolButton(window)
 tb.setText("工具")
 
-menu = QMenu(tb)
-sub_menu = QMenu(tb)
+menu = QMenu(tb) 
+# sub_menu = QMenu(tb) # 实际上sub_menu没必要继承tb
+sub_menu = QMenu() # 将 tb 作为 sub_menu 的父对象并没有实际的意义，因为 sub_menu 的显示和行为完全依赖于它被添加到哪个 QMenu 中
 sub_menu.setTitle("子菜单")
-sub_menu.setIcon(QIcon("../Icons/plus_48px.ico"))
-action = QAction(QIcon("../Icons/cross_48px.ico"), "关闭", menu)
+sub_menu.setIcon(QIcon("./Icons/plus_48px.ico"))
+action = QAction(QIcon("./Icons/cross_48px.ico"), "关闭", menu)
 action.triggered.connect(lambda: exit())
 
 menu.addMenu(sub_menu)
