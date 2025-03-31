@@ -1,6 +1,8 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QPushButton, QCompleter
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QSize, QTimer
 
 
 class Window(QWidget):
@@ -15,8 +17,9 @@ class Window(QWidget):
         cbb = QComboBox(self)
         cbb.move(100, 100)
         cbb.resize(150, 30)
-        cbb.addItems(["muzing", "123", "abc"])
-        cbb.addItem(QIcon("../Icons/android_96px_1.ico"), "android")
+        cbb.addItems(["bill", "123", "abc"])
+        # 添加图标
+        cbb.addItem(QIcon("./Icons/android_96px_1.ico"), "android")
 
         btn = QPushButton("测试按钮", self)
         btn.move(300, 200)
@@ -27,15 +30,10 @@ class Window(QWidget):
 
         # -------可重复-------
         cbb.setDuplicatesEnabled(True)  # 允许Text完全相同的选项
+        cbb.addItems(["bill", "123", "abc"])
         # print(cbb.duplicatesEnabled())
 
-        # ------有框架--------
-        cbb.setFrame(False)  # 默认为True有边框
-        cbb.hasFrame()
-
-        # -----图标尺寸-------
         cbb.setIconSize(QSize(60, 60))
-        # print(cbb.iconSize())
 
         # ------尺寸调整策略------
         """
@@ -46,6 +44,7 @@ class Window(QWidget):
         QComboBox.AdjustToMinimumContentsLength  不建议使用
         QComboBox.AdjustToMinimumContentsLengthWithIcon  出于性能原因，请在大型模型上使用此策略
         """
+
         cbb.setSizeAdjustPolicy(QComboBox.AdjustToContents)
         # print(cbb.sizePolicy())
 
@@ -53,16 +52,20 @@ class Window(QWidget):
         # btn.clicked.connect(cbb.clear)  # 清空条目内容
         # btn.clicked.connect(cbb.clearEditText)  # 仅删除编辑内容，不删除条目
 
+        def show_popup():
+            """
+            显示2秒后隐藏
+            """
+
+            cbb.showPopup()
+
+            QTimer.singleShot(2000, lambda: cbb.hidePopup())
+
         # ------弹出---------
-        btn.clicked.connect(cbb.showPopup)
-        # btn.clicked.connect(cbb.hidePopup)
+        btn.clicked.connect(show_popup)
 
         # -------完成器------
-        cbb.setCompleter(QCompleter(["abc", "123", "muzing"]))
-
-        # -------验证器--------
-        # QValidator()
-        # cbb.setValidator()
+        cbb.setCompleter(QCompleter(["abc", "123", "bill"]))
 
 
 if __name__ == "__main__":

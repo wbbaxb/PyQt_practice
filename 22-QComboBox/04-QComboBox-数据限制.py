@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox
 
 
 class Window(QWidget):
@@ -17,9 +17,11 @@ class Window(QWidget):
         cbb.resize(100, 20)
         cbb.setEditable(True)
 
-        cbb.addItems([str(i) for i in range(5)])
-        cbb.setMaxCount(7)  # 限制最多存储7条，达到7后无法添加新的
-        cbb.setMaxVisibleItems(5)  # 限制每页最多只显示5条
+        cbb.addItems(['Item:' + str(i) for i in range(50)])
+        cbb.setFixedSize(100, 20)
+        cbb.setStyleSheet('font-size: 20px;')
+        cbb.setMaxCount(20)  # 限制最多存储20条，达到20后无法添加新的
+        cbb.setMaxVisibleItems(10)  # 限制每页最多只显示10条
 
 
 if __name__ == "__main__":

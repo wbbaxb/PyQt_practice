@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox
 
 
 class Window(QWidget):
@@ -30,7 +30,8 @@ class Window(QWidget):
         cbb.activated.connect(lambda val: print("条目被激活", val))
         cbb.activated[str].connect(lambda val: print("条目被激活", val))
         cbb.currentIndexChanged.connect(lambda val: print("当前索引发生改变", val))
-        cbb.currentIndexChanged[str].connect(lambda val: print("当前索引发生改变", val))
+        cbb.currentIndexChanged[str].connect(
+            lambda val: print("当前索引发生改变", val))
         cbb.highlighted.connect(lambda val: print("高亮发生改变", val))
 
 
