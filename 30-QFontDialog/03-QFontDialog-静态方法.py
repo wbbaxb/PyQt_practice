@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QFontDialog, QLabel, QVBoxLayout
+from PyQt5.QtGui import QFont
 
 
 class Window(QWidget):
@@ -16,15 +17,9 @@ class Window(QWidget):
         btn.move(100, 100)
         label = QLabel(self)
         label.move(100, 200)
-        label.setText("muzing")
+        label.setText("bill")
 
-        def font_sel_1():
-            result = QFontDialog.getFont(self)  # 返回一个元组，(QFont, bool) 用户点击确定键则为True
-            if result[1]:
-                label.setFont(result[0])
-                label.adjustSize()
-
-        def font_sel_2():
+        def font_set():
             font = QFont()
             font.setFamily("宋体")
             font.setPointSize(22)
@@ -35,8 +30,7 @@ class Window(QWidget):
                 label.setFont(result[0])
                 label.adjustSize()
 
-        # btn.clicked.connect(font_sel_1)
-        btn.clicked.connect(font_sel_2)
+        btn.clicked.connect(font_set)
 
 
 if __name__ == "__main__":

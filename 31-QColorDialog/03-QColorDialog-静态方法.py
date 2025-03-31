@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QColorDialog, QLabel, QVBoxLayout
+from PyQt5.QtGui import QColor, QPalette
 
 
 class Window(QWidget):
@@ -18,10 +19,10 @@ class Window(QWidget):
 
         btn = QPushButton("测试按钮", self)
         btn.move(100, 100)
-        # btn.clicked.connect(lambda: print(cd.customCount()))
+
         btn.clicked.connect(
             lambda: print(QColorDialog.customCount())
-        )  # 是静态方法，也可以这样直接使用
+        )
 
         QColorDialog.setCustomColor(4, QColor(20, 154, 151))  # 修改指定索引位置的自定义颜色
         QColorDialog.setStandardColor(0, QColor(255, 0, 0))  # 修改指定索引位置的标准颜色
