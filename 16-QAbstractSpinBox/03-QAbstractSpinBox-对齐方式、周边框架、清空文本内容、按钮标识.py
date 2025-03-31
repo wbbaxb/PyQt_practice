@@ -1,7 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
-
+from PyQt5.QtWidgets import QApplication, QWidget, QAbstractSpinBox
+from PyQt5.QtCore import Qt
 
 class MyASB(QAbstractSpinBox):
     def __init__(self, parent, num: int = 0):

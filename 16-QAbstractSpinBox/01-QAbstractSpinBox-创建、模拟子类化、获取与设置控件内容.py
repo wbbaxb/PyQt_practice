@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QAbstractSpinBox, QPushButton
 
 
 class MyASB(QAbstractSpinBox):

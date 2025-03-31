@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QSpinBox
 
 
 # ------自定义展示格式--------

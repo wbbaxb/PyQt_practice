@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QSpinBox
 
 
 class Window(QWidget):
@@ -17,7 +17,6 @@ class Window(QWidget):
         sb.move(100, 100)
 
         sb.valueChanged[int].connect(lambda val: print("数值发生了改变", val))
-        sb.valueChanged[str].connect(lambda val: print("数值发生了改变", val))
 
 
 if __name__ == "__main__":

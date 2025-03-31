@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QAbstractSpinBox, QTextEdit
+from PyQt5.QtGui import QValidator
 
 
 class MyASB(QAbstractSpinBox):

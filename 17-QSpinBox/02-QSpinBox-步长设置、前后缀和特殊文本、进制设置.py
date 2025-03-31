@@ -1,7 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
-
+from PyQt5.QtWidgets import QApplication, QWidget, QSpinBox
 
 class Window(QWidget):
     def __init__(self):

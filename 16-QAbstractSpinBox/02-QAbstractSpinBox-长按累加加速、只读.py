@@ -1,6 +1,6 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QApplication, QWidget, QAbstractSpinBox
 
 
 class MyASB(QAbstractSpinBox):
@@ -31,8 +31,8 @@ class Window(QWidget):
         asb.move(150, 100)
 
         # -------累加加速--------
-        asb.setAccelerated(True)  # 加速
-        print(asb.isAccelerated())
+        asb.setAccelerated(True)  # 加速(长按小箭头会累加加速)
+        print(asb.isAccelerated())  # 返回是否加速
 
         # ------只读---------
         asb.setReadOnly(True)  # 不能通过键盘直接修改数字，但可以通过小箭头控制数字增减

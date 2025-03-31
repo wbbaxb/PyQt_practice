@@ -1,7 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
-
+from PyQt5.QtWidgets import QApplication, QWidget, QTextEdit, QPushButton
+from PyQt5.QtGui import QTextDocumentFragment
 
 class Window(QWidget):
     def __init__(self):
@@ -22,9 +22,9 @@ class Window(QWidget):
     def test_btn_cao(self):
         # print(self.te.document())
         # print(self.te.textCursor())
-        self.光标插入内容()
+        self.insert_text()
 
-    def 光标插入内容(self):
+    def insert_text(self):
         # tcf = QTextCharFormat()  # 文本字符格式
         # tcf.setToolTip("我是一个ToolTip")
         # # tcf.setFontFamily('PingFang SC-Regular')
