@@ -1,6 +1,9 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import (QMainWindow, QTextEdit, QStatusBar, QMenuBar, QToolBar,
+                             QApplication, QMenu, QFileDialog)
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 
 
 class Window(QMainWindow):
@@ -41,10 +44,10 @@ class Window(QMainWindow):
         self.toolbar.setFloatable(False)  # 是否允许工具栏脱离主窗口悬浮，默认为True
         self.toolbar.addAction("关闭窗口", lambda: self.close())
         self.toolbar.addAction(
-            QIcon("../Icons/text-icons/undo_96px.ico"), "撤销", self.text_edit.undo
+            QIcon("./Icons/text-icons/undo_96px.ico"), "撤销", self.text_edit.undo
         )
         self.toolbar.addAction(
-            QIcon("../Icons/text-icons/redo_96px.ico"), "重做", self.text_edit.redo
+            QIcon("./Icons/text-icons/redo_96px.ico"), "重做", self.text_edit.redo
         )
 
     def setup_ui(self):

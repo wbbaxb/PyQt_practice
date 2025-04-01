@@ -1,7 +1,11 @@
 import sys
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QPushButton, QWidget,QApplication
+from PyQt5.QtCore import Qt
 
-from PyQt5.Qt import *
-
+"""
+自定义信号
+"""
 
 class Btn(QPushButton):
     # someSignal = pyqtSignal(int, str)  # 如果期望信号发射时携带信息，直接在定义时写明信息的数据类型

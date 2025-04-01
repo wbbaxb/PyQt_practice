@@ -1,6 +1,13 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QPushButton, QWidget, QApplication
+from PyQt5.QtCore import Qt
+
+"""
+自定义信号
+重载、多个参数
+"""
 
 
 class Btn(QPushButton):
@@ -18,7 +25,7 @@ class Btn(QPushButton):
             self.rightClicked[int].emit(888)  # 发送信号，指明了传递的参数为int类型
 
         if e.button() == Qt.LeftButton:
-            self.leftClicked[int, str].emit(888, "muzing")  # 指明传递参数的数量和对应类型
+            self.leftClicked[int, str].emit(888, "test")  # 指明传递参数的数量和对应类型
 
 
 class Window(QWidget):
@@ -36,10 +43,12 @@ class Window(QWidget):
         btn.rightClicked.connect(lambda content: print("按钮被鼠标右键点击击了", content))
 
         # 指明需要的参数类型，找int那一项
-        # btn.rightClicked[int].connect(lambda content: print('按钮被鼠标右键点击击了', content))
+        btn.rightClicked[int].connect(
+            lambda content: print('按钮被鼠标右键点击击了', content))
 
         # 传递多个参数
-        btn.leftClicked[int, str].connect(lambda c1, c2: print("鼠标左键被点击了", c1, c2))
+        btn.leftClicked[int, str].connect(
+            lambda c1, c2: print("鼠标左键被点击了", c1, c2))
 
 
 if __name__ == "__main__":
