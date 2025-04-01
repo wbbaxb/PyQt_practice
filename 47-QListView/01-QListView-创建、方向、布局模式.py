@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QListView, QWidget, QApplication, QMessageBox
+from PyQt5.QtCore import QStringListModel
 
 
 class Window(QWidget):
@@ -17,11 +18,11 @@ class Window(QWidget):
         slm = QStringListModel()  # 创建model模型
         slm.setStringList(self.data_list)
         list_view.setModel(slm)  # 为视图设置模型
-        list_view.clicked.connect(self.clicked_list)  # 会传出用户点击项的索引
+        list_view.clicked.connect(self.clicked_list)  # 传出点击的索引
 
         # -------方向---------
-        # list_view.setFlow(QListView.LeftToRight)
-        list_view.setFlow(QListView.TopToBottom)
+        # list_view.setFlow(QListView.LeftToRight) # 从左到右
+        list_view.setFlow(QListView.TopToBottom)  # 设置方向为从上到下
 
         # ------布局模式（分批列出）-------
         list_view.setBatchSize(5)  # 每批列出的项目个数
@@ -29,11 +30,9 @@ class Window(QWidget):
         list_view.setLayoutMode(QListView.SinglePass)  # 一次性列出
 
     def clicked_list(self, model_index):
-        # 弹出一个消息提升框，展示用户点击哪个项
         QMessageBox.information(
             self, "QListView", "你选择了: " + self.data_list[model_index.row()]
         )
-        print("点击的是：" + str(model_index.row()))
 
 
 if __name__ == "__main__":

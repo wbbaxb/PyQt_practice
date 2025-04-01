@@ -1,6 +1,7 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QWidget, QApplication, QListView, QGridLayout
+from PyQt5.QtCore import QStringListModel, QSize
 
 
 class Window(QWidget):
