@@ -1,7 +1,10 @@
 import sys
 
-from PyQt5.Qt import *
+from PyQt5.QtWidgets import QWidget, QApplication, QDial
 
+"""
+QDial 是一个圆形滑块(类似于转盘)，可以用来调整数值。
+"""
 
 class Window(QWidget):
     def __init__(self):
