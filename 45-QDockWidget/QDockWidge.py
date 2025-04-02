@@ -5,6 +5,7 @@ import sys
 import json
 from pathlib import Path
 from flowLayout import FlowLayout
+from attribut_edit import AttributeEditWindow 
 
 
 class AnnotationTool(QMainWindow):
@@ -85,7 +86,7 @@ class AnnotationTool(QMainWindow):
                         self.image_attribute_dict[key] = ["unknown"]
                     else:
                         self.image_attribute_dict[key] = val
-                        
+
     def setup_ui(self):
         """
         初始化UI
@@ -109,9 +110,11 @@ class AnnotationTool(QMainWindow):
         # 滚动区域容器
         scroll = QScrollArea()
         content = QWidget()
-        v_layout = QVBoxLayout(content)  # 设置垂直布局
+        self.v_layout = QVBoxLayout(content)  # 设置垂直布局
         # 设置垂直布局的间距
-        v_layout.setSpacing(30)
+        self.v_layout.setSpacing(30)
+
+        self.add_edit_group_box()
 
         # 遍历self.attributes字典
         for key, val in self.attributes.items():
@@ -163,12 +166,33 @@ class AnnotationTool(QMainWindow):
                 flow_layout.addWidget(check_box)
 
             group_box.setLayout(flow_layout)
-            v_layout.addWidget(group_box)
+            self.v_layout.addWidget(group_box)
 
         scroll.setWidget(content)  # 设置滚动区域的部件为content
         scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
         self.dock.setWidget(scroll)  # 设置停靠窗口的部件为scroll
         self.dock.visibilityChanged.connect(self.dock_visibility_changed)
+
+    def add_edit_group_box(self):
+        """
+        添加编辑组框
+        """
+
+        edit_group_box = QGroupBox("编辑")
+        edit_layout = QVBoxLayout()
+        edit_group_box.setLayout(edit_layout)
+        self.v_layout.addWidget(edit_group_box)
+
+        btn_edit = QPushButton("编辑")
+        edit_layout.addWidget(btn_edit)
+        btn_edit.clicked.connect(self.show_edit_window)
+
+    def show_edit_window(self):
+        """
+        显示编辑窗口,必须定义一个全局变量，否则编辑窗口会闪退
+        """
+        self.attribute_edit_window = AttributeEditWindow(self.attributes)
+        self.attribute_edit_window.show()
 
     def check_box_toggled(self, value):
         """
@@ -180,7 +204,7 @@ class AnnotationTool(QMainWindow):
             # 获取存储在复选框属性中的分类和选项名称
             attribute_type = sender.property("attribute_type")
             option_name = sender.property("option_name")
-            
+
             # 增加互斥逻辑
             if value:  # 当选中某个选项时
                 # 如果选中的是 "unknown"，则取消同组中其他选项
@@ -189,7 +213,7 @@ class AnnotationTool(QMainWindow):
                 # 如果选中的不是 "unknown"，则取消同组中的 "unknown" 选项
                 else:
                     self.clear_option(attribute_type, "unknown")
-                
+
             self.update_attribute_list(attribute_type, option_name, value)
 
     def clear_other_options(self, attribute_type, except_option):
@@ -197,21 +221,22 @@ class AnnotationTool(QMainWindow):
         清除同一组中除了指定选项外的所有选项
         """
         # 查找所有带有相同 attribute_type 属性的复选框
-        for child in self.findChildren(QCheckBox): # 获取当前窗口中所有复选框
+        for child in self.findChildren(QCheckBox):  # 获取当前窗口中所有复选框
             if (child.property("attribute_type") == attribute_type and child.property("option_name") != except_option and child.isChecked()):
                 # 暂时断开信号连接，防止触发 toggled 信号引起循环
                 child.blockSignals(True)
                 child.setChecked(False)
                 child.blockSignals(False)
                 # 更新属性列表
-                self.update_attribute_list(attribute_type, child.property("option_name"), False)
+                self.update_attribute_list(
+                    attribute_type, child.property("option_name"), False)
 
     def clear_option(self, attribute_type, option_name):
         """
         清除指定组中的指定选项
         """
         # 查找特定的复选框
-        for child in self.findChildren(QCheckBox): # 获取当前窗口中所有复选框
+        for child in self.findChildren(QCheckBox):  # 获取当前窗口中所有复选框
             if (child.property("attribute_type") == attribute_type and child.property("option_name") == option_name and child.isChecked()):
                 # 暂时断开信号连接，防止触发 toggled 信号引起循环
                 child.blockSignals(True)
@@ -227,29 +252,30 @@ class AnnotationTool(QMainWindow):
 
         if not self.image_attribute_dict:
             self.image_attribute_dict = {}
-        
+
         if attribute_type not in self.image_attribute_dict:
             self.image_attribute_dict[attribute_type] = []
-        
+
         if value:
             if option_name not in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].append(option_name)
         else:
             if option_name in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].remove(option_name)
-                
+
                 # 如果移除后该属性组没有任何选项，则自动选中unknown选项
                 if not self.image_attribute_dict[attribute_type] and option_name != "unknown":
                     # 查找unknown复选框并选中它
                     for child in self.findChildren(QCheckBox):
-                        if (child.property("attribute_type") == attribute_type and 
-                            child.property("option_name") == "unknown"):
+                        if (child.property("attribute_type") == attribute_type and
+                                child.property("option_name") == "unknown"):
                             # 阻止信号以避免递归
                             child.blockSignals(True)
                             child.setChecked(True)
                             child.blockSignals(False)
                             # 更新属性列表
-                            self.image_attribute_dict[attribute_type].append("unknown")
+                            self.image_attribute_dict[attribute_type].append(
+                                "unknown")
                             break
 
         self.save_image_attribute()
@@ -343,17 +369,18 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    # window.resize(800, 600)
+    window.resize(800, 600)
     # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
     # window.setWindowTitle("QDockWidget Demo")
 
     # 移动窗口到屏幕中心
-    # screen = QApplication.primaryScreen()
-    # center_point = screen.availableGeometry().center()
-    # x = int(center_point.x() - window.width() / 2)
-    # y = int(center_point.y() - window.height() / 2)
-    # window.move(x, y)
+    screen = QApplication.primaryScreen()
+    center_point = screen.availableGeometry().center()
+    x = int(center_point.x() - window.width() / 2)
+    y = int(center_point.y() - window.height() / 2)
+    window.move(x, y)
+    window.show()
 
-    window.showMaximized()
+    # window.showMaximized()
 
     sys.exit(app.exec_())
