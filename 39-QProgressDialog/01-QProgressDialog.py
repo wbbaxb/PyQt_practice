@@ -31,25 +31,20 @@ class Window(QWidget):
         self.pd.open(lambda: print("对话框被取消"))  # 窗口级别模态窗口
 
         self.pd.setMinimumDuration(0)  # 设置最小等待时间
-        print('self.run')
         self.run()
 
     def set_progress(self):
-        print('set_progress')
         for i in range(1, 101):
             sleep(0.01)
             self.pd.setValue(i)
 
     def run(self):
-        qtimer = QTimer()
         # 启动定时器，1000s后执行set_progress方法
         QTimer.singleShot(1000, self.set_progress)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-
     window = Window()
     window.show()
-
     sys.exit(app.exec_())

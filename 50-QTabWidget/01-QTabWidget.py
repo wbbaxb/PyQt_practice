@@ -1,7 +1,8 @@
 import sys
 import random
-from PyQt5.QtWidgets import QWidget, QApplication, QTabWidget, QLabel,  QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QApplication, QTabWidget, QLabel,  QVBoxLayout, QPushButton, QGridLayout
 from PyQt5.QtGui import QIcon
+
 
 class Window(QWidget):
     def __init__(self):
@@ -15,7 +16,8 @@ class Window(QWidget):
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
         self.tab_layout = QVBoxLayout()
-        self.btn_layout = QVBoxLayout()
+        self.btn_layout = QGridLayout()
+        self.btn_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.addLayout(self.tab_layout)
         self.main_layout.addLayout(self.btn_layout)
 
@@ -38,30 +40,30 @@ class Window(QWidget):
     def setup_btn(self):
         btn_add = QPushButton("Add Tab")
         btn_add.clicked.connect(self.add_tab)
-        self.btn_layout.addWidget(btn_add)
+        self.btn_layout.addWidget(btn_add, 0, 0)
 
         btn_set_pos = QPushButton("Set Tab Position")
         btn_set_pos.clicked.connect(self.set_tab_position)
-        self.btn_layout.addWidget(btn_set_pos)
+        self.btn_layout.addWidget(btn_set_pos, 0, 1)
 
         btn_set_shape = QPushButton("Set Tab Shape")
         btn_set_shape.clicked.connect(self.set_tab_shape)
-        self.btn_layout.addWidget(btn_set_shape)
+        self.btn_layout.addWidget(btn_set_shape, 0, 2)
 
         btn_set_movable = QPushButton("Set Tab Movable")
         btn_set_movable.clicked.connect(
             lambda: self.tab_widget.setMovable(not self.tab_widget.isMovable()))
-        self.btn_layout.addWidget(btn_set_movable)
+        self.btn_layout.addWidget(btn_set_movable, 1, 0)
 
         btn_set_closable = QPushButton("Set Tab Closable")
         btn_set_closable.clicked.connect(self.set_tab_closable)
-        self.btn_layout.addWidget(btn_set_closable)
+        self.btn_layout.addWidget(btn_set_closable, 1, 1)
 
         btn_set_auto_hide = QPushButton("Set Tab Auto Hide")
         btn_set_auto_hide.clicked.connect(
             # 设置标签自动隐藏,当只剩一个标签页时自动隐藏tabbar
             lambda: self.tab_widget.setTabBarAutoHide(True))
-        self.btn_layout.addWidget(btn_set_auto_hide)
+        self.btn_layout.addWidget(btn_set_auto_hide, 1, 2)
 
         btn_set_document_mode = QPushButton("Set Tab Document Mode")
         btn_set_document_mode.clicked.connect(
@@ -69,19 +71,19 @@ class Window(QWidget):
             # 此属性设置为True时，不会呈现选项卡部件框架，即选项卡页面和其后的窗口等页面无框架区分看起来是一个整体。
             # 此模式对于页面需要显示文档类型的情况非常有用，因为节省了选项卡部件框架占用的部分空间。
             lambda: self.tab_widget.setDocumentMode(not self.tab_widget.documentMode()))
-        self.btn_layout.addWidget(btn_set_document_mode)
+        self.btn_layout.addWidget(btn_set_document_mode, 2, 0)
 
         btn_remove_last_tab = QPushButton("Remove Last Tab")
         btn_remove_last_tab.clicked.connect(self.remove_last_tab)
-        self.btn_layout.addWidget(btn_remove_last_tab)
+        self.btn_layout.addWidget(btn_remove_last_tab, 2, 1)
 
         btn_clear_tabs = QPushButton("Clear Tabs")
         btn_clear_tabs.clicked.connect(lambda: self.tab_widget.clear())
-        self.btn_layout.addWidget(btn_clear_tabs)
+        self.btn_layout.addWidget(btn_clear_tabs, 2, 2)
 
         btn_set_last_tab_disabled = QPushButton("Set Last Tab Disabled")
         btn_set_last_tab_disabled.clicked.connect(self.set_last_tab_disabled)
-        self.btn_layout.addWidget(btn_set_last_tab_disabled)
+        self.btn_layout.addWidget(btn_set_last_tab_disabled, 3, 0)
 
         btn_set_tab_scroll_buttons = QPushButton("Set Tab Scroll Buttons")
         btn_set_tab_scroll_buttons.clicked.connect(
@@ -89,23 +91,26 @@ class Window(QWidget):
             # 默认为True，当空间不足以显示全部页签时，添加一个滚动按钮以滚动显示被隐藏的页签
             # 如果为False，则不显示滚动按钮，当不够显示时，会自动撑大宽度
             lambda: self.tab_widget.setUsesScrollButtons(not self.tab_widget.usesScrollButtons()))
-        self.btn_layout.addWidget(btn_set_tab_scroll_buttons)
+        self.btn_layout.addWidget(btn_set_tab_scroll_buttons, 3, 1)
 
         btn_set_icon = QPushButton("Set Tab Icon")
         btn_set_icon.clicked.connect(self.set_tab_icon)
-        self.btn_layout.addWidget(btn_set_icon)
+        self.btn_layout.addWidget(btn_set_icon, 3, 2)
 
         btn_insert_tab_by_icon = QPushButton("Insert Tab By Icon")
         btn_insert_tab_by_icon.clicked.connect(self.insert_tab_by_icon)
-        self.btn_layout.addWidget(btn_insert_tab_by_icon)
+        # 4,0 表示在第4行第0列，1,3表示占据1行3列
+        self.btn_layout.addWidget(btn_insert_tab_by_icon, 4, 0, 1, 3)
 
     def set_tab_icon(self):
         """设置tab标签图标"""
-        self.tab_widget.setTabIcon(self.tab_widget.count() - 1, QIcon("./Icons/OS_Ubuntu_128px.ico"))
+        self.tab_widget.setTabIcon(
+            self.tab_widget.count() - 1, QIcon("./Icons/OS_Ubuntu_128px.ico"))
 
     def insert_tab_by_icon(self):
         """在最前面插入tab标签图标并设置图标"""
-        self.tab_widget.insertTab(0, QLabel("First Tab"), QIcon("./Icons/OS_Ubuntu_128px.ico"), "First Tab")
+        self.tab_widget.insertTab(0, QLabel("First Tab"), QIcon(
+            "./Icons/OS_Ubuntu_128px.ico"), "First Tab")
 
     def set_last_tab_disabled(self):
         """
