@@ -39,8 +39,9 @@ class Window(QWidget):
         # --------对齐-----------
         # setItemAlignment 只有在 ListMode 为 TopToBottom 且 wrapping 打开时才有效
         # list_view.setItemAlignment(Qt.AlignTop)  # 垂直靠上对齐
-        list_view.setItemAlignment(
-            Qt.AlignVCenter | Qt.AlignLeft)  # 垂直居中，水平靠左对齐
+
+        # 垂直居中，水平靠左对齐
+        list_view.setItemAlignment(Qt.AlignVCenter | Qt.AlignLeft) 
 
         # ------单词省略------
         list_view.setWordWrap(True)  # 启用单词省略，太长的文本将收到省略号...中
