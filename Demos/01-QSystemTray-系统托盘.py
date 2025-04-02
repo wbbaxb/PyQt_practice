@@ -20,7 +20,7 @@ class SystemTray:
     def initUI(self):
         # 设置托盘图标
 
-        self.tp.setIcon(QIcon("../Icons/python_96px.ico"))
+        self.tp.setIcon(QIcon("./Icons/python_96px.ico"))
 
     def quitApp(self):
         # 退出程序
