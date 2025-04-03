@@ -4,8 +4,8 @@ from PyQt5.QtCore import Qt
 import sys
 import json
 from pathlib import Path
-from flowLayout import FlowLayout
-from attribut_edit import AttributeEditWindow 
+from Common.flowLayout import FlowLayout
+from attribut_edit_dialog import AttributeEditDialog 
 
 
 class AnnotationTool(QMainWindow):
@@ -189,10 +189,11 @@ class AnnotationTool(QMainWindow):
 
     def show_edit_window(self):
         """
-        显示编辑窗口,必须定义一个全局变量，否则编辑窗口会闪退
+        显示编辑窗口,需要设置parent=self，否则编辑窗口会闪退
         """
-        self.attribute_edit_window = AttributeEditWindow(self.attributes)
-        self.attribute_edit_window.show()
+        dialog = AttributeEditDialog(attributes=self.attributes,parent=self)
+        dialog.setWindowModality(Qt.ApplicationModal)
+        dialog.show()
 
     def check_box_toggled(self, value):
         """
