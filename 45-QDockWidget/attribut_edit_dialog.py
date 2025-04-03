@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QGroupBox, QGridLayout, QLabel, QWidget
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
+from add_new_attribute import AddNewAttributeDialog
 
 
 class AttributeEditDialog(QDialog):
@@ -13,9 +14,6 @@ class AttributeEditDialog(QDialog):
         self.show_attributes()
 
     def setup_ui(self):
-        """
-        设置UI
-        """
         self.setWindowTitle("属性编辑")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
         self.resize(800, 600)
@@ -32,6 +30,7 @@ class AttributeEditDialog(QDialog):
                 color: black;
             }
             QPushButton {
+                background-color: lightblue;
                 border-radius: 4px;
                 height: 30px;
                 font-size: 13px;
@@ -119,15 +118,11 @@ class AttributeEditDialog(QDialog):
             h_layout.addWidget(btn_delete_attribute)
 
     def add_attribute(self):
-        """
-        添加属性
-        """
-        print("添加属性")
+        dialog = AddNewAttributeDialog(parent=self)
+        dialog.setWindowModality(Qt.ApplicationModal)
+        dialog.show()
 
     def edit_attribute(self):
-        """
-        编辑属性
-        """
         # 获取发送信号的按钮
         sender = self.sender()
         # 获取按钮的属性
