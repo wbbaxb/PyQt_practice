@@ -57,7 +57,11 @@ class CustomDialog(QDialog):
         close_btn = QPushButton("关闭")
         close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn)
+        # 显示最小化，最大化，关闭按钮
+        self.setWindowFlags(Qt.Window | Qt.WindowTitleHint | Qt.WindowMinimizeButtonHint | Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
 
+        # 禁止窗口调整大小
+        self.setFixedSize(self.size())
 
 class DialogTest(QWidget):
     def __init__(self):
