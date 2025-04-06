@@ -3,22 +3,23 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
 from add_new_attribute import AddNewAttributeDialog
-from Common.dpiscaler import DpiScaler
+from Common.screen_info import ScreenInfo
 
 
 class AttributeEditDialog(QDialog):
     def __init__(self, attributes: dict, parent=None):
         super().__init__(parent=parent)
         self.attributes = attributes
-        print(self.attributes)
-        self.font_size = DpiScaler.scaled_font_size()
+        self.screen_info = ScreenInfo.get_screen_info()
+        self.font_size = int(self.screen_info[1] * 14 * 1.2)
         self.setup_ui()
         self.show_attributes()
 
     def setup_ui(self):
         self.setWindowTitle("属性编辑")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-        self.resize(800, 600)
+        self.resize(
+            int(800 * self.screen_info[1]), int(600 * self.screen_info[1]))
         self.move(500, 500)
         self.setMinimumHeight(400)  # 设置最小高度，否则无法调整高度
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
@@ -26,37 +27,37 @@ class AttributeEditDialog(QDialog):
 
         # 整体应用样式
         self.setStyleSheet(f"""
+            QWidget#attributeContainer {{
+                border: 2px solid orange;
+                border-radius: 10px;
+                background-color: white;
+            }}
             QLabel {{
                 font-size: {self.font_size}px;
                 font-weight: bold;
                 color: black;
             }}
             QPushButton {{
-                background-color: lightblue;
-                border-radius: 4px;
-                height: 40px;
-                font-size: {self.font_size}px;
-            }}
-            QPushButton:hover {{
-                background-color: orange;
-            }}
-            QPushButton:pressed {{
-                background-color: red;
-            }}
-            QPushButton#editBtn {{
-                background-color: lightblue;
-                border-radius: 4px;
-                height: 40px;
-                font-size: {self.font_size}px;
-            }}  
-            QPushButton#deleteBtn {{
-                background-color: #f44336;
-            }}
-            QPushButton#addBtn {{
-                background-color: #2196F3;
+                border-radius: 5px;
+                background-color:#2196F3;
                 padding: 10px 20px;
                 font-size: {self.font_size}px;
                 font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: rgb(73, 170, 159);
+            }}
+            QPushButton:pressed {{
+                background-color: rgb(234, 208, 112);
+            }}
+            QPushButton#deleteBtn {{
+                background-color: #f44336;
+            }}
+            QPushButton#deleteBtn:hover {{
+                background-color: rgb(198, 122, 211);
+            }}
+            QPushButton#deleteBtn:pressed {{
+                background-color: rgb(206, 200, 229);
             }}
         """)
 
@@ -67,11 +68,11 @@ class AttributeEditDialog(QDialog):
         self.main_layout.addLayout(self.top_layout)
 
         self.grid_layout = UniformGridLayout()
-        self.grid_layout.setSpacing(15)  # 增加间距
+        self.grid_layout.setSpacing(20)
         self.main_layout.addLayout(self.grid_layout)
 
         btn_add_attribute = QPushButton("添加属性")
-        btn_add_attribute.setObjectName("addBtn")
+        btn_add_attribute.setFixedHeight(50)
         btn_add_attribute.setCursor(Qt.PointingHandCursor)
         btn_add_attribute.setMinimumHeight(40)
         btn_add_attribute.clicked.connect(self.add_attribute)
@@ -85,14 +86,6 @@ class AttributeEditDialog(QDialog):
             container = QWidget()
             # 设置对象名称以应用特定样式，只对容器设置边框，不影响子控件
             container.setObjectName("attributeContainer")
-
-            container.setStyleSheet("""
-                QWidget#attributeContainer {
-                    border: 1px solid orange;
-                    border-radius: 6px;
-                    background-color: white;
-                }
-            """)
             main_layout = QVBoxLayout()
             main_layout.setContentsMargins(10, 10, 10, 10)  # 增加内边距
             container.setLayout(main_layout)

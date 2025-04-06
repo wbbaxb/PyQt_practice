@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from Common.flowLayout import FlowLayout
 from attribut_edit_dialog import AttributeEditDialog
-from Common.dpiscaler import DpiScaler
+from Common.screen_info import ScreenInfo
 
 
 class AnnotationTool(QMainWindow):
@@ -23,7 +23,8 @@ class AnnotationTool(QMainWindow):
         self.image_attribute_dict = {}
         self.image_attribute_path = Path(__file__).parent / "舌图.json"
         self.load_image_attribute()
-        self.font_size = DpiScaler.scaled_font_size()
+        self.screen_info = ScreenInfo.get_screen_info()
+        self.font_size = int(self.screen_info[1] * 14 * 1.2)
         self.setup_ui()
 
     def load_attributes(self):
@@ -381,7 +382,7 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    window.resize(800, 600)
+    window.resize(int(800 * window.screen_info[1]), int(600 * window.screen_info[1]))
     # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
     # window.setWindowTitle("QDockWidget Demo")
 

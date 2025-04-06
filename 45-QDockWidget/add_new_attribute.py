@@ -1,22 +1,23 @@
 from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout,
-                             QLabel, QWidget, QLineEdit, QListWidget, QScrollArea,
-                             QFrame, QMessageBox)
+                             QLabel, QLineEdit, QListWidget, QFrame, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from Common.dpiscaler import DpiScaler
+from Common.screen_info import ScreenInfo
 
 
 class AddNewAttributeDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.attribute_values = []  # 存储属性可能的值
-        self.font_size = DpiScaler.scaled_font_size()
+        self.screen_info = ScreenInfo.get_screen_info()
+        self.font_size = int(self.screen_info[1] * 14 * 1.2)
         self.setup_ui()
 
     def setup_ui(self):
         self.setWindowTitle("添加属性")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-        self.resize(400, 450)
+        self.resize(
+            int(500 * self.screen_info[1]), int(550 * self.screen_info[1]))
         self.move(500, 500)
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
                             Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
@@ -25,36 +26,52 @@ class AddNewAttributeDialog(QDialog):
         self.setStyleSheet(f"""
             /* 重置从父对话框继承的样式 */
             AddNewAttributeDialog {{
-                background-color: #f0f0f0;
-            }}  
+                background-color: white;
+            }}
+            QPushButton {{
+                border-radius: 5px;
+                background-color: #2196F3;
+                padding: 10px 20px;
+                font-size: {self.font_size}px;
+                font-weight: bold;
+            }}
+            QPushButton:disabled {{
+                background-color: gray;
+                color: white;
+            }}
+            QPushButton:hover {{
+                background-color: rgb(73, 170, 159);
+            }}
+            QPushButton:pressed {{
+                background-color: rgb(234, 208, 112);
+            }}
             QLabel {{
                 font-size: {self.font_size}px;
-                font-weight: normal;
-                color: #333333;
+                font-weight: bold;
+                color: black;
                 border: none;
             }}
             QLineEdit {{
-                border: 1px solid #cccccc;
-                border-radius: 3px;
+                font-size: {self.font_size}px;
+                border: 1px solid #2196F3;
+                border-radius: 5px;
                 padding: 4px;
                 background-color: white;
             }}
-            QLineEdit:focus {{
-                border-color: #5d80c1;
-            }}
             QListWidget {{
-                border: 1px solid #cccccc;
+                border: 2px solid #cccccc;
                 background-color: white;
-                border-radius: 3px;
+                border-radius: 8px;
+                height: {int(self.screen_info[1]*30)}px;
             }}
             QListWidget::item {{
-                height: 25px;
-                padding: 3px;
+                height: {int(self.screen_info[1]*20)}px;
+                padding: 8px;
             }}
-            QListWidget::item:selected {{
-                background-color: #5d80c1;
-                color: white;
-            }}
+            # QListWidget::item:selected {{
+            #     background-color: green;
+            #     color: white;
+            # }}
             QFrame {{
                 background-color: white;
                 border-radius: 5px;
