@@ -27,31 +27,40 @@ class AttributeEditDialog(QDialog):
 
         # 整体应用样式
         self.setStyleSheet(f"""
+            /* 容器样式 */
             QWidget#attributeContainer {{
                 border: 2px solid orange;
                 border-radius: 10px;
                 background-color: white;
             }}
+            
+            /* 标签样式 */
             QLabel {{
                 font-size: {self.font_size}px;
                 font-weight: bold;
                 color: black;
             }}
+            
+            /* 按钮通用样式 */
             QPushButton {{
                 border-radius: 5px;
-                background-color:#2196F3;
                 padding: 10px 20px;
                 font-size: {self.font_size}px;
                 font-weight: bold;
+                background-color: #2196F3;
             }}
+            
+            /* 删除按钮特殊样式 */
+            QPushButton#deleteBtn {{
+                background-color: #f44336;
+            }}
+            
+            /* 按钮状态样式 */
             QPushButton:hover {{
                 background-color: rgb(73, 170, 159);
             }}
             QPushButton:pressed {{
                 background-color: rgb(234, 208, 112);
-            }}
-            QPushButton#deleteBtn {{
-                background-color: #f44336;
             }}
             QPushButton#deleteBtn:hover {{
                 background-color: rgb(198, 122, 211);

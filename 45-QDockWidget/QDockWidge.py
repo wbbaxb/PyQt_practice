@@ -98,11 +98,49 @@ class AnnotationTool(QMainWindow):
         self.set_dock_widget()
 
         self.setStyleSheet(f"""
-            QPushButton {{
-                font-size: {self.font_size}px;
+            /* 按钮通用样式 */
+            QPushButton#edit_btn, QPushButton#toggle_dock_btn {{
+                color: white;
+                border-radius: 10px;
             }}
+            
+            /* 特定按钮样式 */
+            QPushButton#edit_btn {{
+                background-color: green;
+                height: {int(self.screen_info[1] * 30)}px;
+            }}
+            QPushButton#toggle_dock_btn {{
+                background-color: orange;
+                height: 50px;
+            }}
+            
+            /* 按钮悬停和按下效果 */
+            QPushButton#edit_btn:hover, QPushButton#toggle_dock_btn:hover {{
+                background-color: rgb(73, 170, 159);
+            }}
+            QPushButton#edit_btn:pressed, QPushButton#toggle_dock_btn:pressed {{
+                background-color: rgb(234, 208, 112);
+            }}
+            
+            /* 组框样式 */
             QGroupBox {{
                 font-size: {self.font_size}px;
+                border: 1px solid lightblue;
+                border-radius: 3px;
+                margin-top: 20px;
+                padding: 20px 10px;  /* 增加垂直和水平内边距 */
+            }}
+            QGroupBox::title {{
+                left: 0;
+                padding: 0;
+                background-color: lightblue;
+                border-radius: 2px;
+                font-size: {self.font_size}px;
+            }}
+            
+            /* 主容器背景 */
+            QWidget#main_container {{
+                background-color: lightblue;
             }}
         """)
 
@@ -112,8 +150,8 @@ class AnnotationTool(QMainWindow):
         """
         # 创建停靠属性面板,第一个参数是停靠窗口的标题，第二个参数是停靠窗口的父窗口
         self.dock = QDockWidget("属性设置", self)
-        self.dock.setMinimumWidth(400)  # 设置最小宽度
-        self.dock.setMinimumHeight(200)  # 设置最小高度
+        self.dock.setMinimumWidth(int(self.screen_info[1] * 500))  # 设置最小宽度
+        self.dock.setMinimumHeight(int(self.screen_info[1] * 300))  # 设置最小高度
 
         # 第一个参数是停靠窗口的位置，第二个参数是停靠窗口（QDockWidget对象）
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock)
@@ -121,6 +159,7 @@ class AnnotationTool(QMainWindow):
         # 滚动区域容器
         scroll = QScrollArea()
         content = QWidget()
+        content.setObjectName('v_layout_content')
         self.v_layout = QVBoxLayout(content)  # 设置垂直布局
         # 设置垂直布局的间距
         self.v_layout.setSpacing(30)
@@ -130,23 +169,6 @@ class AnnotationTool(QMainWindow):
         # 遍历self.attributes字典
         for key, val in self.attributes.items():
             group_box = QGroupBox(key)
-
-            group_box.setStyleSheet(f"""
-                QGroupBox {{
-                    font-size: {self.font_size}px;
-                    border: 1px solid lightblue;
-                    border-radius: 3px;
-                    margin-top: 20px;
-                    padding: 20px 10px;  /* 增加垂直和水平内边距 */
-                }}
-                QGroupBox::title {{
-                    left: 0;
-                    padding: 0;
-                    background-color: lightblue;
-                    border-radius: 2px;
-                    font-size: {self.font_size}px;
-                }}
-            """)
 
             # 使用自定义的流式布局
             flow_layout = FlowLayout(spacing=20)
@@ -196,6 +218,8 @@ class AnnotationTool(QMainWindow):
         self.v_layout.addWidget(edit_group_box)
 
         btn_edit = QPushButton("编辑")
+        btn_edit.setCursor(Qt.PointingHandCursor)
+        btn_edit.setObjectName("edit_btn")
         edit_layout.addWidget(btn_edit)
         btn_edit.clicked.connect(self.show_edit_window)
 
@@ -330,8 +354,8 @@ class AnnotationTool(QMainWindow):
 
         # 创建一个容器widget来包含布局
         container = QWidget()
+        container.setObjectName('main_container')
         container.setLayout(self.v_layout)  # 将布局设置到widget上
-        container.setStyleSheet("background-color: lightblue;")
 
         self.setCentralWidget(container)  # 将widget设置为中央窗口部件
 
@@ -348,14 +372,7 @@ class AnnotationTool(QMainWindow):
         添加按钮
         """
         self.btn = QPushButton("切换停靠控件")
-        self.btn.setStyleSheet("""
-            QPushButton {
-                background-color: orange;
-                color: white;
-                height: 50px;
-                border-radius: 10px;
-            }
-        """)
+        self.btn.setObjectName("toggle_dock_btn")
         self.btn.setCursor(Qt.PointingHandCursor)
         self.btn.clicked.connect(self.toggle_dock)
         self.v_layout.addWidget(self.btn)
@@ -382,7 +399,8 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    window.resize(int(800 * window.screen_info[1]), int(600 * window.screen_info[1]))
+    window.resize(
+        int(800 * window.screen_info[1]), int(600 * window.screen_info[1]))
     # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
     # window.setWindowTitle("QDockWidget Demo")
 

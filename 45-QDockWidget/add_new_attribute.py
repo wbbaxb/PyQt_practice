@@ -25,9 +25,11 @@ class AddNewAttributeDialog(QDialog):
         # 设置子对话框独立的样式表，防止继承父样式
         self.setStyleSheet(f"""
             /* 重置从父对话框继承的样式 */
-            AddNewAttributeDialog {{
+            AddNewAttributeDialog, QFrame, QLineEdit, QListWidget {{
                 background-color: white;
             }}
+            
+            /* 通用按钮样式 */
             QPushButton {{
                 border-radius: 5px;
                 background-color: #2196F3;
@@ -35,6 +37,13 @@ class AddNewAttributeDialog(QDialog):
                 font-size: {self.font_size}px;
                 font-weight: bold;
             }}
+            
+            /* 红色按钮样式 */
+            QPushButton#cancelBtn, QPushButton#deleteValueBtn {{
+                background-color: #f44336;
+            }}
+            
+            /* 按钮状态 */
             QPushButton:disabled {{
                 background-color: gray;
                 color: white;
@@ -45,6 +54,14 @@ class AddNewAttributeDialog(QDialog):
             QPushButton:pressed {{
                 background-color: rgb(234, 208, 112);
             }}
+            QPushButton#cancelBtn:hover, QPushButton#deleteValueBtn:hover {{
+                background-color: rgb(198, 122, 211);
+            }}
+            QPushButton#cancelBtn:pressed, QPushButton#deleteValueBtn:pressed {{
+                background-color: rgb(206, 200, 229);
+            }}
+            
+            /* 其他控件样式 */
             QLabel {{
                 font-size: {self.font_size}px;
                 font-weight: bold;
@@ -56,11 +73,9 @@ class AddNewAttributeDialog(QDialog):
                 border: 1px solid #2196F3;
                 border-radius: 5px;
                 padding: 4px;
-                background-color: white;
             }}
             QListWidget {{
                 border: 2px solid #cccccc;
-                background-color: white;
                 border-radius: 8px;
                 height: {int(self.screen_info[1]*30)}px;
             }}
@@ -68,12 +83,7 @@ class AddNewAttributeDialog(QDialog):
                 height: {int(self.screen_info[1]*20)}px;
                 padding: 8px;
             }}
-            # QListWidget::item:selected {{
-            #     background-color: green;
-            #     color: white;
-            # }}
             QFrame {{
-                background-color: white;
                 border-radius: 5px;
             }}
         """)
@@ -121,7 +131,6 @@ class AddNewAttributeDialog(QDialog):
         # 添加属性值按钮
         self.add_value_btn = QPushButton("添加值")
         self.add_value_btn.setEnabled(False)
-        self.add_value_btn.setObjectName("addValueBtn")
         self.add_value_btn.setCursor(Qt.PointingHandCursor)
         self.add_value_btn.clicked.connect(self.add_attribute_value)
         value_input_layout.addWidget(self.add_value_btn)
@@ -146,7 +155,6 @@ class AddNewAttributeDialog(QDialog):
 
         # 确认添加按钮
         btn_confirm = QPushButton("确认")
-        btn_confirm.setObjectName("confirmBtn")
         btn_confirm.setCursor(Qt.PointingHandCursor)
         btn_confirm.clicked.connect(self.confirm_add_attribute)
         btn_layout.addWidget(btn_confirm)
@@ -209,3 +217,12 @@ class AddNewAttributeDialog(QDialog):
 
     def cancel(self):
         self.reject()  # 关闭对话框
+
+if __name__ == "__main__":
+    from PyQt5.QtWidgets import QApplication 
+    import sys
+    app = QApplication(sys.argv)
+    dialog = AddNewAttributeDialog()
+    dialog.exec_()
+    sys.exit(app.exec_())
+
