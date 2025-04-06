@@ -3,12 +3,14 @@ from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout,
                              QFrame, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
+from Common.dpiscaler import DpiScaler
 
 
 class AddNewAttributeDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.attribute_values = []  # 存储属性可能的值
+        self.font_size = DpiScaler.scaled_font_size()
         self.setup_ui()
 
     def setup_ui(self):
@@ -20,39 +22,43 @@ class AddNewAttributeDialog(QDialog):
                             Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
 
         # 设置子对话框独立的样式表，防止继承父样式
-        self.setStyleSheet("""
+        self.setStyleSheet(f"""
             /* 重置从父对话框继承的样式 */
-            AddNewAttributeDialog {
+            AddNewAttributeDialog {{
                 background-color: #f0f0f0;
-            }
-            QLabel {
-                font-size: 12px;
+            }}  
+            QLabel {{
+                font-size: {self.font_size}px;
                 font-weight: normal;
                 color: #333333;
                 border: none;
-            }
-            QLineEdit {
+            }}
+            QLineEdit {{
                 border: 1px solid #cccccc;
                 border-radius: 3px;
                 padding: 4px;
                 background-color: white;
-            }
-            QLineEdit:focus {
+            }}
+            QLineEdit:focus {{
                 border-color: #5d80c1;
-            }
-            QListWidget {
+            }}
+            QListWidget {{
                 border: 1px solid #cccccc;
                 background-color: white;
                 border-radius: 3px;
-            }
-            QListWidget::item {
+            }}
+            QListWidget::item {{
                 height: 25px;
                 padding: 3px;
-            }
-            QListWidget::item:selected {
+            }}
+            QListWidget::item:selected {{
                 background-color: #5d80c1;
                 color: white;
-            }
+            }}
+            QFrame {{
+                background-color: white;
+                border-radius: 5px;
+            }}
         """)
 
         self.main_layout = QVBoxLayout()
@@ -60,15 +66,12 @@ class AddNewAttributeDialog(QDialog):
 
         # 属性名称部分
         name_group = QFrame()
-        name_group.setFrameShape(QFrame.StyledPanel) # 设置为圆角
-        name_group.setStyleSheet(
-            "background-color: white; border-radius: 5px;")
+        name_group.setFrameShape(QFrame.StyledPanel)  # 设置为圆角
         name_layout = QVBoxLayout(name_group)
         self.main_layout.addWidget(name_group)
 
         # 属性名标题
         name_title = QLabel("属性名称")
-        name_title.setStyleSheet("font-weight: bold; font-size: 14px;")
         name_layout.addWidget(name_title)
 
         # 属性名输入
@@ -81,15 +84,12 @@ class AddNewAttributeDialog(QDialog):
 
         # 属性值部分
         values_group = QFrame()
-        values_group.setFrameShape(QFrame.StyledPanel) # 设置为圆角
-        values_group.setStyleSheet(
-            "background-color: white; border-radius: 5px;")
+        values_group.setFrameShape(QFrame.StyledPanel)  # 设置为圆角
         values_layout = QVBoxLayout(values_group)
         self.main_layout.addWidget(values_group)
 
         # 属性值标题
         values_title = QLabel("属性值")
-        values_title.setStyleSheet("font-weight: bold; font-size: 14px;")
         values_layout.addWidget(values_title)
 
         # 属性值输入
@@ -103,7 +103,6 @@ class AddNewAttributeDialog(QDialog):
 
         # 添加属性值按钮
         self.add_value_btn = QPushButton("添加值")
-        self.add_value_btn.setStyleSheet("height: 30px;background-color: lightblue;")
         self.add_value_btn.setEnabled(False)
         self.add_value_btn.setObjectName("addValueBtn")
         self.add_value_btn.setCursor(Qt.PointingHandCursor)
@@ -154,7 +153,7 @@ class AddNewAttributeDialog(QDialog):
         value = self.value_input.text().strip()
         if not value:
             return
-        
+
         if value in self.attribute_values:
             QMessageBox.warning(self, "警告", "该值已存在!", QMessageBox.Ok)
             return

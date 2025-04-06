@@ -5,7 +5,8 @@ import sys
 import json
 from pathlib import Path
 from Common.flowLayout import FlowLayout
-from attribut_edit_dialog import AttributeEditDialog 
+from attribut_edit_dialog import AttributeEditDialog
+from Common.dpiscaler import DpiScaler
 
 
 class AnnotationTool(QMainWindow):
@@ -22,7 +23,7 @@ class AnnotationTool(QMainWindow):
         self.image_attribute_dict = {}
         self.image_attribute_path = Path(__file__).parent / "舌图.json"
         self.load_image_attribute()
-
+        self.font_size = DpiScaler.scaled_font_size()
         self.setup_ui()
 
     def load_attributes(self):
@@ -95,6 +96,15 @@ class AnnotationTool(QMainWindow):
         self.set_main_layout()
         self.set_dock_widget()
 
+        self.setStyleSheet(f"""
+            QPushButton {{
+                font-size: {self.font_size}px;
+            }}
+            QGroupBox {{
+                font-size: {self.font_size}px;
+            }}
+        """)
+
     def set_dock_widget(self):
         """
         设置停靠窗口
@@ -120,20 +130,21 @@ class AnnotationTool(QMainWindow):
         for key, val in self.attributes.items():
             group_box = QGroupBox(key)
 
-            group_box.setStyleSheet("""
-                QGroupBox {
-                    font-size: 15px;
+            group_box.setStyleSheet(f"""
+                QGroupBox {{
+                    font-size: {self.font_size}px;
                     border: 1px solid lightblue;
                     border-radius: 3px;
                     margin-top: 20px;
                     padding: 20px 10px;  /* 增加垂直和水平内边距 */
-                }
-                QGroupBox::title {
+                }}
+                QGroupBox::title {{
                     left: 0;
                     padding: 0;
                     background-color: lightblue;
                     border-radius: 2px;
-                }
+                    font-size: {self.font_size}px;
+                }}
             """)
 
             # 使用自定义的流式布局
@@ -149,7 +160,7 @@ class AnnotationTool(QMainWindow):
                 # 设置复选框的样式
                 check_box.setStyleSheet(f"""
                     QCheckBox {{
-                        font-size: 15px;
+                        font-size: {self.font_size}px;
                         color: {color};
                     }}
                 """)
@@ -191,7 +202,7 @@ class AnnotationTool(QMainWindow):
         """
         显示编辑窗口,需要设置parent=self，否则编辑窗口会闪退
         """
-        dialog = AttributeEditDialog(attributes=self.attributes,parent=self)
+        dialog = AttributeEditDialog(attributes=self.attributes, parent=self)
         dialog.setWindowModality(Qt.ApplicationModal)
         dialog.show()
 

@@ -3,6 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
 from add_new_attribute import AddNewAttributeDialog
+from Common.dpiscaler import DpiScaler
 
 
 class AttributeEditDialog(QDialog):
@@ -10,6 +11,7 @@ class AttributeEditDialog(QDialog):
         super().__init__(parent=parent)
         self.attributes = attributes
         print(self.attributes)
+        self.font_size = DpiScaler.scaled_font_size()
         self.setup_ui()
         self.show_attributes()
 
@@ -23,39 +25,39 @@ class AttributeEditDialog(QDialog):
                             Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
 
         # 整体应用样式
-        self.setStyleSheet("""
-            QLabel {
-                font-size: 14px;
+        self.setStyleSheet(f"""
+            QLabel {{
+                font-size: {self.font_size}px;
                 font-weight: bold;
                 color: black;
-            }
-            QPushButton {
+            }}
+            QPushButton {{
                 background-color: lightblue;
                 border-radius: 4px;
-                height: 30px;
-                font-size: 13px;
-            }
-            QPushButton:hover {
+                height: 40px;
+                font-size: {self.font_size}px;
+            }}
+            QPushButton:hover {{
                 background-color: orange;
-            }
-            QPushButton:pressed {
+            }}
+            QPushButton:pressed {{
                 background-color: red;
-            }
-            QPushButton#editBtn {
+            }}
+            QPushButton#editBtn {{
                 background-color: lightblue;
                 border-radius: 4px;
-                height: 30px;
-                font-size: 13px;
-            }  
-            QPushButton#deleteBtn {
+                height: 40px;
+                font-size: {self.font_size}px;
+            }}  
+            QPushButton#deleteBtn {{
                 background-color: #f44336;
-            }
-            QPushButton#addBtn {
+            }}
+            QPushButton#addBtn {{
                 background-color: #2196F3;
                 padding: 10px 20px;
-                font-size: 14px;
+                font-size: {self.font_size}px;
                 font-weight: bold;
-            }
+            }}
         """)
 
         self.main_layout = QVBoxLayout()
