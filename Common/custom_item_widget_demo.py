@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton,
+from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,
                              QListWidget, QListWidgetItem, QApplication)
 import sys
 
@@ -36,24 +36,49 @@ class CustomItemWidget(QWidget):
         """)
 
 
-class TestCustomItemWidget:
+class TestCustomItemWidget(QWidget):
     def __init__(self):
-        self.app = QApplication(sys.argv)
+        super().__init__()
+        self.resize(900, 800)
+        main_layout = QVBoxLayout()
+        self.setLayout(main_layout)
         self.list_widget = QListWidget()
-        self.list_widget.setMinimumSize(900, 800)
+        main_layout.addWidget(self.list_widget)
+
+        btn_get_item = QPushButton("获取列表项")
+        btn_get_item.setStyleSheet("""
+            QPushButton {{
+                background-color: black;
+                color: white;
+            }}
+        """)
+
+        main_layout.addWidget(btn_get_item)
+        btn_get_item.clicked.connect(self.get_all_items)
+
+        # 初始化列表项
+        self.init_list_items()
+
+    def get_all_items(self):
+        # 获取所有列表项
+        item_count = self.list_widget.count()
+        print(f"列表中共有 {item_count} 个项目")
+        
+        # 遍历所有项目
+        for i in range(item_count):
+            item = self.list_widget.item(i)
+            widget = self.list_widget.itemWidget(item)
+            if widget:
+                text = widget.label.text()
+                print(f"项目 {i}: {text}")
 
     def remove_item(self, item):
         index = self.list_widget.row(item)
         self.list_widget.takeItem(index)
         print(f"删除了第 {index} 项")
 
-    def test(self):
-        app = QApplication(sys.argv)
-
-        # 创建一个QListWidget
-        self.list_widget = QListWidget()
-        self.list_widget.setMinimumSize(900, 800)
-
+    def init_list_items(self):
+        """初始化列表项"""
         for i in range(10):
             # 创建并添加自定义 Item
             item = QListWidgetItem()
@@ -71,10 +96,9 @@ class TestCustomItemWidget:
             custom_widget.button.clicked.connect(
                 lambda checked=False, widget_item=item: self.remove_item(widget_item))
 
-        self.list_widget.show()
-        sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
+    app = QApplication(sys.argv)
     test = TestCustomItemWidget()
-    test.test()
+    test.show()
+    sys.exit(app.exec_())
