@@ -70,7 +70,6 @@ class AddNewAttributeDialog(QDialog):
         self.setObjectName("addNewAttributeDialog")
         self.screen_info = ScreenInfo.get_screen_info()
         self.font_size = int(self.screen_info[1] * 14 * 1.1)
-        # 先构建UI，再设置样式
         self.setup_ui()
         self.setup_style()
 
@@ -136,7 +135,7 @@ class AddNewAttributeDialog(QDialog):
             }}
             #valuesList::item {{
                 height: {int(self.screen_info[1]*20)}px;
-                padding: 8px;
+                padding: 0px 20px  /* 上下0px，左右20px */
             }}
             #nameGroup, #valuesGroup {{
                 border-radius: 5px;
