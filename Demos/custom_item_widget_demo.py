@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import (QWidget, QHBoxLayout, QLabel, QPushButton, QVBoxLayout,
                              QListWidget, QListWidgetItem, QApplication)
+from PyQt5.QtCore import QSize, Qt
 import sys
 
 
@@ -35,6 +36,11 @@ class CustomItemWidget(QWidget):
             }}
         """)
 
+        self.setMinimumSize(QSize(200, 100))
+
+    def sizeHint(self):
+        return self.minimumSize()
+
 
 class TestCustomItemWidget(QWidget):
     def __init__(self):
@@ -63,7 +69,7 @@ class TestCustomItemWidget(QWidget):
         # 获取所有列表项
         item_count = self.list_widget.count()
         print(f"列表中共有 {item_count} 个项目")
-        
+
         # 遍历所有项目
         for i in range(item_count):
             item = self.list_widget.item(i)
