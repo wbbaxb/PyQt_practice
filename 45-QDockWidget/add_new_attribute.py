@@ -222,7 +222,7 @@ class AddNewAttributeDialog(QDialog):
         custom_widget.button.clicked.connect(
             lambda checked=False, item=item: self.delete_attribute_value(item))
 
-    def confirm_add_attribute(self):
+    def confirm_add_attribute(self) -> tuple[str, list[str]]:
         """确认添加属性"""
         attribute_name = self.name_input.text().strip()
 
@@ -240,10 +240,7 @@ class AddNewAttributeDialog(QDialog):
             return
 
         # 设置对话框的返回数据
-        self.attribute_data = {
-            "name": attribute_name,
-            "values": value_list
-        }
+        self.attribute_data = (attribute_name, value_list)
 
         self.accept()
 

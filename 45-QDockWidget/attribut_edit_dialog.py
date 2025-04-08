@@ -90,10 +90,10 @@ class AttributeEditDialog(QDialog):
         """
         显示所有属性
         """
-        for key in self.attributes.keys():
-            self.add_attribute(key)
+        for item in self.attributes.items():
+            self.add_attribute(item)
 
-    def add_attribute(self, attribute_name: str):
+    def add_attribute(self, attribute_item: tuple[str, list[str]]):
         container = QWidget()
         # 设置对象名称以应用特定样式，只对容器设置边框，不影响子控件
         container.setObjectName("attributeContainer")
@@ -102,7 +102,7 @@ class AttributeEditDialog(QDialog):
         container.setLayout(main_layout)
         self.grid_layout.addWidget(container)
 
-        label = QLabel(attribute_name)
+        label = QLabel(attribute_item[0])
         label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(label)
 
@@ -123,16 +123,34 @@ class AttributeEditDialog(QDialog):
         btn_delete_attribute.setProperty("attribute_key", container)
         h_layout.addWidget(btn_delete_attribute)
 
-        # 使用HTML富文本设置tooltip
-        container.setToolTip(f'''
-        <div style="background-color: #f5f5f5; padding: 10px; border: 2px solid #2196F3; border-radius: 5px;">
-            <h3 style="color: #2196F3; margin: 0 0 10px 0;">属性信息</h3>
-            <p style="margin: 5px 0;"><b>名称:</b> {attribute_name}</p>
-            <hr style="border: 1px solid #cccccc; margin: 10px 0;">
-            <p style="color: #666; margin: 5px 0;">支持HTML富文本格式</p>
-            <img src="./Icons/python_96px.ico" width="32" height="32" />
+        # 美化现有的HTML tooltip样式
+        attr_name = attribute_item[0]
+        attr_values = attribute_item[1]
+        
+        item_str = f"""
+        <div style='background-color: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #2196F3;'>
+            <div style='color: #2196F3; font-weight: bold; font-size: 16px; margin-bottom: 8px; 
+                 border-bottom: 1px solid #ddd; padding-bottom: 5px;'>
+                {attr_name} <span style='color: #888; font-size: 12px;'>({len(attr_values)}个值)</span>
+            </div>
+            <div style='max-height: 200px; overflow-y: auto;'>
+        """
+        
+        for i, value in enumerate(attr_values, 1):
+            # 交替背景色，增强可读性
+            bg_color = "#ffffff" if i % 2 == 0 else "#f8f8f8"
+            item_str += f"""
+            <div style='background-color: {bg_color}; padding: 5px 8px; margin: 3px 0; border-radius: 4px;'>
+                <span style='color: #2196F3; font-weight: bold;'>{i}.</span> {value}
+            </div>
+            """
+            
+        item_str += """
+            </div>
         </div>
-        ''')
+        """
+        
+        container.setToolTip(item_str)
 
     def delete_attribute(self):
         message_box = CustomMessageBox(self)
@@ -156,7 +174,7 @@ class AttributeEditDialog(QDialog):
         result = dialog.exec_()
         if result == QDialog.Accepted:
             attribute_data = dialog.attribute_data
-            self.add_attribute(attribute_data.get('name'))
+            self.add_attribute(attribute_data)
 
     def show_edit_attribute_dialog(self):
         # 获取发送信号的按钮
