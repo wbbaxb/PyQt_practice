@@ -1,18 +1,30 @@
 from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QListWidgetItem,
-                             QLabel, QLineEdit, QListWidget, QFrame, QMessageBox)
-from PyQt5.QtCore import Qt, QSize
+                             QLabel, QLineEdit, QListWidget, QFrame, QMessageBox, QApplication)
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from customitem_widget import CustomItemWidget
+from Common.utils import WindowUtils
 
 
-class AddNewAttributeDialog(QDialog):
-    def __init__(self, parent=None, exits_attributes: list[str] = None):
+class EditAttributeDialog(QDialog):
+    def __init__(self, parent=None, mode: int = 0, exits_attributes: list[str] = None, attribute_item: tuple[str, list[str]] = None):
+        """
+        mode: 0 添加属性 1 编辑属性
+        exits_attributes: 已存在的属性列表, 添加属性时需要传入
+        attribute_item: 属性项, 编辑属性时需要传入
+        """
         super().__init__(parent=parent)
+        WindowUtils.center_on_screen(self)
         self.exits_attributes = exits_attributes
-        self.setObjectName("addNewAttributeDialog")
-        self.font_size = 16
+        self.mode = mode
+        self.attribute_item = attribute_item
+        self.setObjectName("editAttributeDialog")
+        self.font_size = 14
+        self.resize(400, 500)
         self.setup_ui()
+        self.init_attribute_item()
         self.setup_style()
+        
 
     def setup_style(self):
         """
@@ -20,24 +32,29 @@ class AddNewAttributeDialog(QDialog):
         """
         self.setStyleSheet(f"""
             /* 重置从父对话框继承的样式 */
-            #addNewAttributeDialog, #nameGroup, #valuesGroup, #nameInput, #valueInput, #valuesList {{
+            #editAttributeDialog, #nameGroup, #valuesGroup, #nameInput, #valueInput, #valuesList {{
                 background-color: white;
             }}
             
             /* 通用按钮样式 */
             #addValueBtn, #confirmBtn, #cancelBtn {{
-                border-radius: 5px;
-                background-color: #2196F3;
-                padding: 10px 20px;
+                border-radius: 5px; 
+                background-color: #2196F3; /* 蓝色 */
+                padding: 10px 20px; /* 上下10px 左右20px */
                 font-size: {self.font_size}px;
-                font-weight: bold;
+                font-weight: normal;
+            }}
+
+            #addValueBtn {{
+                height: 30px;
+                padding: 0px 10px;
             }}
             
             /* 红色按钮样式 */
             #cancelBtn {{
-                background-color: #f44336;
+                background-color: #f44336; /* 红色 */
+                font-weight: normal;
             }}
-            
             /* 按钮状态 */
             #addValueBtn:disabled, #confirmBtn:disabled {{
                 background-color: gray;
@@ -58,14 +75,21 @@ class AddNewAttributeDialog(QDialog):
             
             /* 其他控件样式 */
             #nameTitle, #valuesTitle {{
+                min-width:70px;
                 font-size: {self.font_size}px;
-                font-weight: bold;
                 color: black;
+                font-weight: normal;
+                border: none;
+            }}
+            #nameLabel {{
+                font-size: 16px;
+                color: black;
+                font-weight: normal;
                 border: none;
             }}
             #nameInput, #valueInput {{
                 font-size: {self.font_size}px;
-                border: 1px solid #2196F3;
+                border: 1px solid #2196F3; /* 蓝色 */
                 border-radius: 5px;
                 padding: 4px;
             }}
@@ -76,7 +100,7 @@ class AddNewAttributeDialog(QDialog):
             }}
             #valuesList::item {{
                 height: 20px;
-                padding: 0px 20px  /* 上下0px，左右20px */
+                padding: 0px 20px  /* 左右20px */
             }}
             #nameGroup, #valuesGroup {{
                 border-radius: 5px;
@@ -84,10 +108,8 @@ class AddNewAttributeDialog(QDialog):
         """)
 
     def setup_ui(self):
-        self.setWindowTitle("添加属性")
+        self.setWindowTitle("添加属性" if self.mode == 0 else "编辑属性")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-        self.resize(500, 550)
-        self.move(500, 500)
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
                             Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
 
@@ -98,23 +120,27 @@ class AddNewAttributeDialog(QDialog):
         name_group = QFrame()
         name_group.setObjectName("nameGroup")
         name_group.setFrameShape(QFrame.StyledPanel)  # 设置为圆角
-        name_layout = QVBoxLayout(name_group)
+        name_layout = QHBoxLayout(name_group)
         self.main_layout.addWidget(name_group)
 
         # 属性名标题
-        name_title = QLabel("属性名称")
+        name_title = QLabel("属性名称：")
         name_title.setObjectName("nameTitle")
         name_layout.addWidget(name_title)
 
-        # 属性名输入
-        name_input_layout = QHBoxLayout()
-        name_layout.addLayout(name_input_layout)
-
-        self.name_input = QLineEdit()
-        self.name_input.setObjectName("nameInput")
-        self.name_input.setPlaceholderText("请输入属性名称")
-        self.name_input.setClearButtonEnabled(True)
-        name_input_layout.addWidget(self.name_input)
+        if self.mode == 0 and self.exits_attributes:  # 添加属性
+            self.name_input = QLineEdit()
+            self.name_input.setObjectName("nameInput")
+            self.name_input.setPlaceholderText("请输入属性名称")
+            self.name_input.setClearButtonEnabled(True)
+            name_layout.addWidget(self.name_input)
+        elif self.mode == 1 and self.attribute_item:  # 编辑属性
+            self.name_label = QLabel(self.attribute_item[0])
+            self.name_label.setAlignment(
+                Qt.AlignLeft | Qt.AlignVCenter)  # 左对齐，垂直居中
+            self.name_label.setObjectName("nameLabel")
+            name_layout.addWidget(self.name_label)
+            name_layout.setStretch(1, 10)
 
         # 属性值部分
         values_group = QFrame()
@@ -123,14 +149,14 @@ class AddNewAttributeDialog(QDialog):
         values_layout = QVBoxLayout(values_group)
         self.main_layout.addWidget(values_group)
 
-        # 属性值标题
-        values_title = QLabel("属性值")
-        values_title.setObjectName("valuesTitle")
-        values_layout.addWidget(values_title)
+        values_input_layout = QHBoxLayout()
+        values_layout.addLayout(values_input_layout)
 
-        # 属性值输入
-        value_input_layout = QHBoxLayout()
-        values_layout.addLayout(value_input_layout)
+        # 属性值标题
+        values_title = QLabel("属性值：")
+        values_title.setObjectName("valuesTitle")
+        values_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)  # 左对齐，垂直居中
+        values_input_layout.addWidget(values_title)
 
         self.value_input = QLineEdit()
         self.value_input.setObjectName("valueInput")
@@ -138,15 +164,15 @@ class AddNewAttributeDialog(QDialog):
         self.value_input.setClearButtonEnabled(True)
         self.value_input.textChanged.connect(
             lambda: self.add_value_btn.setEnabled(self.value_input.text() != ""))
-        value_input_layout.addWidget(self.value_input)
+        values_input_layout.addWidget(self.value_input)
 
         # 添加属性值按钮
-        self.add_value_btn = QPushButton("添加值")
+        self.add_value_btn = QPushButton("添加属性值")
         self.add_value_btn.setObjectName("addValueBtn")
         self.add_value_btn.setEnabled(False)
         self.add_value_btn.setCursor(Qt.PointingHandCursor)
         self.add_value_btn.clicked.connect(self.add_attribute_value)
-        value_input_layout.addWidget(self.add_value_btn)
+        values_input_layout.addWidget(self.add_value_btn)
 
         # 显示已添加的值列表
         self.values_list = QListWidget()
@@ -171,6 +197,12 @@ class AddNewAttributeDialog(QDialog):
         btn_cancel.setCursor(Qt.PointingHandCursor)
         btn_cancel.clicked.connect(self.cancel)
         btn_layout.addWidget(btn_cancel)
+
+    def init_attribute_item(self):
+        """初始化属性项"""
+        if self.mode == 1 and self.attribute_item:  # 编辑属性
+            for item in self.attribute_item[1]:
+                self.add_attribute_value_to_list(item)
 
     def add_attribute_value(self):
         """添加属性值到列表"""
@@ -246,3 +278,12 @@ class AddNewAttributeDialog(QDialog):
 
     def cancel(self):
         self.reject()
+
+
+if __name__ == "__main__":
+    import sys
+    from PyQt5.QtWidgets import QApplication
+    app = QApplication(sys.argv)
+    dialog = EditAttributeDialog()
+    dialog.show()
+    sys.exit(app.exec_())

@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from Common.flowLayout import FlowLayout
 from attribut_edit_dialog import AttributeEditDialog
+from Common.utils import WindowUtils
 
 
 class AnnotationTool(QMainWindow):
@@ -226,8 +227,8 @@ class AnnotationTool(QMainWindow):
         显示编辑窗口,需要设置parent=self，否则编辑窗口会闪退
         """
         dialog = AttributeEditDialog(attributes=self.attributes, parent=self)
-        dialog.setWindowModality(Qt.ApplicationModal)
-        dialog.show()
+        WindowUtils.center_on_parent(dialog)
+        dialog.exec()
 
     def check_box_toggled(self, value):
         """
@@ -397,18 +398,9 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    window.resize(800, 600)
+    window.resize(1000, 800)
     # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
     # window.setWindowTitle("QDockWidget Demo")
-
-    # 移动窗口到屏幕中心
-    screen = QApplication.primaryScreen()
-    center_point = screen.availableGeometry().center()
-    x = int(center_point.x() - window.width() / 2)
-    y = int(center_point.y() - window.height() / 2)
-    window.move(x, y)
+    WindowUtils.center_on_screen(window)
     window.show()
-
-    # window.showMaximized()
-
     sys.exit(app.exec_())

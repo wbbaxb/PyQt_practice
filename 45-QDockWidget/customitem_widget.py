@@ -12,7 +12,7 @@ class CustomItemWidget(QWidget):
         self.setLayout(self.main_layout)
 
         self.frame = QFrame()
-        self.frame.setMinimumSize(QSize(100, 50))
+        self.frame.setMinimumSize(QSize(100, 40))
         self.main_layout.addWidget(self.frame)
 
         self.h_layout = QHBoxLayout()
@@ -25,7 +25,7 @@ class CustomItemWidget(QWidget):
         self.label.setObjectName("CustomItemLabel")
 
         self.button = QPushButton("删除")
-        self.button.setMinimumHeight(30)
+        self.button.setMinimumHeight(25)
         self.button.setObjectName("CustomItemButton")
         self.button.setCursor(Qt.PointingHandCursor)
 
@@ -43,12 +43,14 @@ class CustomItemWidget(QWidget):
                 font-size: {self.font_size}px;
                 color: black;
                 background-color: transparent;
+                font-weight: normal;
             }}
             #CustomItemButton {{
                 background-color: red;
                 color: white;
                 border-radius: 4px;
                 font-size: {int(self.font_size)}px;
+                font-weight: normal;
             }}
             #CustomItemButton:hover {{
                 background-color: rgb(198, 122, 211);
