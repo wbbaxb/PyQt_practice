@@ -2,74 +2,15 @@ from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWi
                              QLabel, QLineEdit, QListWidget, QFrame, QMessageBox)
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QIcon
-from Common.screen_info import ScreenInfo
-
-
-class CustomItemWidget(QWidget):
-    def __init__(self, text, parent=None):
-        super().__init__(parent)
-        self.screen_info = ScreenInfo.get_screen_info()
-        self.font_size = int(self.screen_info[1] * 14 * 1.1)
-
-        self.main_layout = QVBoxLayout()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setAlignment(Qt.AlignVCenter)
-        self.setLayout(self.main_layout)
-
-        self.frame = QFrame()
-        self.frame.setMinimumSize(QSize(100, 50))
-        self.main_layout.addWidget(self.frame)
-
-        self.h_layout = QHBoxLayout()
-        self.h_layout.setContentsMargins(0, 0, 0, 0)
-        self.h_layout.setAlignment(Qt.AlignVCenter)
-        self.h_layout.setSpacing(0)
-        self.frame.setLayout(self.h_layout)
-
-        self.label = QLabel(text)
-        self.label.setObjectName("CustomItemLabel")
-
-        self.button = QPushButton("删除")
-        self.button.setMinimumSize(QSize(50, 20))
-        self.button.setObjectName("CustomItemButton")
-        self.button.setCursor(Qt.PointingHandCursor)
-
-        self.h_layout.addWidget(self.label, 6, alignment=Qt.AlignVCenter)
-        self.h_layout.addWidget(self.button, 1, alignment=Qt.AlignVCenter)
-
-        self.setup_style()
-
-    def get_size(self) -> QSize:
-        return self.frame.minimumSize()
-
-    def setup_style(self):
-        self.setStyleSheet(f"""
-            #CustomItemLabel {{
-                font-size: {self.font_size}px;
-                color: black;
-                background-color: transparent;
-            }}
-            #CustomItemButton {{
-                background-color: red;
-                color: white;
-                border-radius: 4px;
-                font-size: {int(self.font_size)}px;
-            }}
-            #CustomItemButton:hover {{
-                background-color: rgb(198, 122, 211);
-            }}
-            #CustomItemButton:pressed {{
-                background-color: rgb(206, 200, 229);
-            }}
-        """)
+from customitem_widget import CustomItemWidget
 
 
 class AddNewAttributeDialog(QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, exits_attributes: list[str] = None):
         super().__init__(parent=parent)
+        self.exits_attributes = exits_attributes
         self.setObjectName("addNewAttributeDialog")
-        self.screen_info = ScreenInfo.get_screen_info()
-        self.font_size = int(self.screen_info[1] * 14 * 1.1)
+        self.font_size = 16
         self.setup_ui()
         self.setup_style()
 
@@ -131,10 +72,10 @@ class AddNewAttributeDialog(QDialog):
             #valuesList {{
                 border: 2px solid #cccccc;
                 border-radius: 8px;
-                height: {int(self.screen_info[1]*30)}px;
+                height: 150px;
             }}
             #valuesList::item {{
-                height: {int(self.screen_info[1]*20)}px;
+                height: 20px;
                 padding: 0px 20px  /* 上下0px，左右20px */
             }}
             #nameGroup, #valuesGroup {{
@@ -145,8 +86,7 @@ class AddNewAttributeDialog(QDialog):
     def setup_ui(self):
         self.setWindowTitle("添加属性")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-        self.resize(
-            int(500 * self.screen_info[1]), int(550 * self.screen_info[1]))
+        self.resize(500, 550)
         self.move(500, 500)
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
                             Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
@@ -277,7 +217,6 @@ class AddNewAttributeDialog(QDialog):
 
         # 设置更合适的大小提示，以确保QFrame正确居中显示
         size = custom_widget.get_size()
-        print(f'size.width:{size.width()},size.height:{size.height()}')
         item.setSizeHint(size)
 
         custom_widget.button.clicked.connect(
@@ -288,25 +227,25 @@ class AddNewAttributeDialog(QDialog):
         attribute_name = self.name_input.text().strip()
 
         if not attribute_name:
-            QMessageBox.warning(self, "警告", "请输入属性名称!")
+            QMessageBox.warning(self, "警告", "请输入属性名!")
             return
 
-        if not self.get_all_items():
+        if self.exits_attributes and attribute_name in self.exits_attributes:
+            QMessageBox.critical(self, "错误", f'{attribute_name}已存在!')
+            return
+
+        value_list = self.get_all_items()
+        if not value_list:
             QMessageBox.warning(self, "警告", "请至少添加一个属性值!")
             return
 
-        print(f"属性名称: {attribute_name}")
-        print(f"属性值: {self.get_all_items()}")
+        # 设置对话框的返回数据
+        self.attribute_data = {
+            "name": attribute_name,
+            "values": value_list
+        }
 
-        self.accept()  # 成功添加后关闭窗口
+        self.accept()
 
     def cancel(self):
-        self.reject()  # 关闭对话框
-
-
-if __name__ == "__main__":
-    from PyQt5.QtWidgets import QApplication
-    import sys
-    app = QApplication(sys.argv)
-    dialog = AddNewAttributeDialog()
-    sys.exit(dialog.exec_())
+        self.reject()

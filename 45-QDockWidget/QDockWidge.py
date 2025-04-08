@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 from Common.flowLayout import FlowLayout
 from attribut_edit_dialog import AttributeEditDialog
-from Common.screen_info import ScreenInfo
 
 
 class AnnotationTool(QMainWindow):
@@ -23,8 +22,7 @@ class AnnotationTool(QMainWindow):
         self.image_attribute_dict = {}
         self.image_attribute_path = Path(__file__).parent / "舌图.json"
         self.load_image_attribute()
-        self.screen_info = ScreenInfo.get_screen_info()
-        self.font_size = int(self.screen_info[1] * 14 * 1.2)
+        self.font_size = 16
         self.setup_ui()
 
     def load_attributes(self):
@@ -107,7 +105,7 @@ class AnnotationTool(QMainWindow):
             /* 特定按钮样式 */
             QPushButton#edit_btn {{
                 background-color: green;
-                height: {int(self.screen_info[1] * 30)}px;
+                height: 30px;
             }}
             QPushButton#toggle_dock_btn {{
                 background-color: orange;
@@ -150,8 +148,8 @@ class AnnotationTool(QMainWindow):
         """
         # 创建停靠属性面板,第一个参数是停靠窗口的标题，第二个参数是停靠窗口的父窗口
         self.dock = QDockWidget("属性设置", self)
-        self.dock.setMinimumWidth(int(self.screen_info[1] * 500))  # 设置最小宽度
-        self.dock.setMinimumHeight(int(self.screen_info[1] * 300))  # 设置最小高度
+        self.dock.setMinimumWidth(500)  # 设置最小宽度
+        self.dock.setMinimumHeight(300)  # 设置最小高度
 
         # 第一个参数是停靠窗口的位置，第二个参数是停靠窗口（QDockWidget对象）
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock)
@@ -399,8 +397,7 @@ class AnnotationTool(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = AnnotationTool()
-    window.resize(
-        int(800 * window.screen_info[1]), int(600 * window.screen_info[1]))
+    window.resize(800, 600)
     # window.setWindowIcon(QIcon("./Icons/python_96px.ico"))
     # window.setWindowTitle("QDockWidget Demo")
 
