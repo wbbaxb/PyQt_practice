@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import (QMainWindow, QDockWidget, QScrollArea, QWidget, QPushButton,
-                             QVBoxLayout, QGroupBox, QCheckBox, QLabel, QApplication)
+                             QVBoxLayout, QGroupBox, QCheckBox, QApplication, QFileDialog)
 from PyQt5.QtCore import Qt
 import sys
 import json
@@ -7,48 +7,20 @@ from pathlib import Path
 from Common.flowLayout import FlowLayout
 from attribut_edit_dialog import AttributeEditDialog
 from Common.utils import WindowUtils
+from attribute_config_helper import AttributeConfigHelper
 
 
 class AnnotationTool(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.attributes = {}  # 属性列表
-        self.load_attributes()  # 加载属性
-
-        if not self.attributes:
-            print("属性为空,请检查attributes.json文件")
-            return
-
+        self.attributes = AttributeConfigHelper.get_config()
         self.image_attribute_dict = {}
         self.image_attribute_path = Path(__file__).parent / "舌图.json"
         self.load_image_attribute()
         self.font_size = 16
+        self.setup_style()
         self.setup_ui()
-
-    def load_attributes(self):
-        """
-        加载属性文件
-        """
-        path = Path(__file__).parent / "attributes.json"
-
-        if not path.exists():
-            print(f"文件不存在: {path}")
-            return []
-
-        with open(path, "r", encoding="utf-8") as f:
-            attributes = json.load(f)
-
-            if not attributes:
-                return {}
-
-            keys = list(attributes.keys())
-            key = keys[0] if keys else []
-
-            if not key:
-                return {}
-
-            self.attributes = attributes.get(key, {})
 
     def load_image_attribute(self):
         """
@@ -75,35 +47,21 @@ class AnnotationTool(QMainWindow):
             # 为了兼容之前标注过的舌图JSON文件,处理字符串或者列表
             for key, val in attributes.items():
                 if isinstance(val, str):
-                    if val:
-                        self.image_attribute_dict[key] = [val]
-                    else:
-                        self.image_attribute_dict[key] = ['unknown']
+                    self.image_attribute_dict[key] = [val]
                 elif isinstance(val, list):
                     self.image_attribute_dict[key] = val
 
-                    # 如果是空列表，设置为["unknown"]
-                    if not val:
-                        self.image_attribute_dict[key] = ["unknown"]
-                    else:
-                        self.image_attribute_dict[key] = val
-
-    def setup_ui(self):
-        """
-        初始化UI
-        """
-
-        self.set_main_layout()
-        self.set_dock_widget()
-
+    def setup_style(self):
         self.setStyleSheet(f"""
-            /* 按钮通用样式 */
+            QCheckBox {{
+                font-size: {self.font_size}px;
+                color: black;
+            }}
             QPushButton#edit_btn, QPushButton#toggle_dock_btn {{
                 color: white;
                 border-radius: 10px;
             }}
             
-            /* 特定按钮样式 */
             QPushButton#edit_btn {{
                 background-color: green;
                 height: 30px;
@@ -113,7 +71,6 @@ class AnnotationTool(QMainWindow):
                 height: 50px;
             }}
             
-            /* 按钮悬停和按下效果 */
             QPushButton#edit_btn:hover, QPushButton#toggle_dock_btn:hover {{
                 background-color: rgb(73, 170, 159);
             }}
@@ -121,7 +78,6 @@ class AnnotationTool(QMainWindow):
                 background-color: rgb(234, 208, 112);
             }}
             
-            /* 组框样式 */
             QGroupBox {{
                 font-size: {self.font_size}px;
                 border: 1px solid lightblue;
@@ -136,56 +92,121 @@ class AnnotationTool(QMainWindow):
                 border-radius: 2px;
                 font-size: {self.font_size}px;
             }}
-            
-            /* 主容器背景 */
             QWidget#main_container {{
                 background-color: lightblue;
             }}
         """)
 
+    def setup_ui(self):
+        """
+        初始化UI
+        """
+
+        self.main_layout = QVBoxLayout()
+
+        container = QWidget()
+        container.setObjectName('main_container')
+        container.setLayout(self.main_layout)
+
+        self.setCentralWidget(container)  # 将widget设置为中央窗口部件
+
+        self.btn_toggle = QPushButton("切换停靠控件")
+        self.btn_toggle.setObjectName("toggle_dock_btn")
+        self.btn_toggle.setCursor(Qt.PointingHandCursor)
+        self.btn_toggle.clicked.connect(self.toggle_dock)
+        self.main_layout.addWidget(self.btn_toggle)
+
+        if not self.attributes:
+            self.btn_import = QPushButton("尚未导入属性文件，点击导入")
+            self.btn_import.setCursor(Qt.PointingHandCursor)
+            self.btn_import.clicked.connect(self.import_attribute)
+            self.main_layout.addWidget(self.btn_import)
+
+        self.set_dock_widget()
+
     def set_dock_widget(self):
         """
         设置停靠窗口
         """
-        # 创建停靠属性面板,第一个参数是停靠窗口的标题，第二个参数是停靠窗口的父窗口
+
         self.dock = QDockWidget("属性设置", self)
-        self.dock.setMinimumWidth(500)  # 设置最小宽度
-        self.dock.setMinimumHeight(300)  # 设置最小高度
+        self.dock.setMinimumWidth(500)
+        self.dock.setMinimumHeight(300)
+        self.dock.visibilityChanged.connect(self.dock_visibility_changed)
 
         # 第一个参数是停靠窗口的位置，第二个参数是停靠窗口（QDockWidget对象）
         self.addDockWidget(Qt.RightDockWidgetArea, self.dock)
 
-        # 滚动区域容器
-        scroll = QScrollArea()
-        content = QWidget()
-        content.setObjectName('v_layout_content')
-        self.v_layout = QVBoxLayout(content)  # 设置垂直布局
-        # 设置垂直布局的间距
-        self.v_layout.setSpacing(30)
+        self.dock_container = QWidget()
+        self.dock.setWidget(self.dock_container)
+
+        self.dock_layout = QVBoxLayout()
+        self.dock_container.setLayout(self.dock_layout)
 
         self.add_edit_group_box()
 
-        # 遍历self.attributes字典
-        for key, val in self.attributes.items():
+        # 创建滚动区域容器
+        scroll = QScrollArea()
+        content = QWidget()
+
+        # 创建布局并设置给内容控件
+        self.attributes_layout = QVBoxLayout()
+        content.setLayout(self.attributes_layout)
+
+        scroll.setWidget(content)  # 设置滚动区域的部件为content
+        scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
+
+        # 将滚动区域添加到dock_layout中
+        self.dock_layout.addWidget(scroll)
+
+    def add_edit_group_box(self):
+        """
+        添加编辑组框
+        """
+
+        self.v_layout = QVBoxLayout()
+        self.v_layout.setSpacing(30)
+        self.dock_layout.addLayout(self.v_layout)
+        edit_group_box = QGroupBox("编辑")
+        edit_layout = QVBoxLayout()
+        edit_group_box.setLayout(edit_layout)
+        self.v_layout.addWidget(edit_group_box)
+
+        btn_edit = QPushButton("编辑")
+        btn_edit.setCursor(Qt.PointingHandCursor)
+        btn_edit.setObjectName("edit_btn")
+        edit_layout.addWidget(btn_edit)
+        btn_edit.clicked.connect(self.show_edit_window)
+
+    def set_attribute_group_box(self):
+        """
+        设置属性组框
+        """
+        # 检查attributes是否有嵌套结构
+        if len(self.attributes) == 1 and isinstance(next(iter(self.attributes.values())), dict):
+            # 如果是嵌套结构，获取第一个键对应的值作为属性字典
+            first_key = next(iter(self.attributes.keys()))
+            attribute_dict = self.attributes[first_key]
+        else:
+            # 如果不是嵌套结构，直接使用attributes
+            attribute_dict = self.attributes
+
+        # 先清空attributes_layout中的所有控件
+        while self.attributes_layout.count():
+            item = self.attributes_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+
+        for key, val in attribute_dict.items():
             group_box = QGroupBox(key)
 
-            # 使用自定义的流式布局
             flow_layout = FlowLayout(spacing=20)
 
             # 添加选项
             for option in val:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
-
-                color = 'red' if option == 'unknown' else '#000000'
-
-                # 设置复选框的样式
-                check_box.setStyleSheet(f"""
-                    QCheckBox {{
-                        font-size: {self.font_size}px;
-                        color: {color};
-                    }}
-                """)
 
                 # 设置属性存储分类名称和选项名称
                 check_box.setProperty("attribute_type", key)
@@ -199,28 +220,7 @@ class AnnotationTool(QMainWindow):
                 flow_layout.addWidget(check_box)
 
             group_box.setLayout(flow_layout)
-            self.v_layout.addWidget(group_box)
-
-        scroll.setWidget(content)  # 设置滚动区域的部件为content
-        scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
-        self.dock.setWidget(scroll)  # 设置停靠窗口的部件为scroll
-        self.dock.visibilityChanged.connect(self.dock_visibility_changed)
-
-    def add_edit_group_box(self):
-        """
-        添加编辑组框
-        """
-
-        edit_group_box = QGroupBox("编辑")
-        edit_layout = QVBoxLayout()
-        edit_group_box.setLayout(edit_layout)
-        self.v_layout.addWidget(edit_group_box)
-
-        btn_edit = QPushButton("编辑")
-        btn_edit.setCursor(Qt.PointingHandCursor)
-        btn_edit.setObjectName("edit_btn")
-        edit_layout.addWidget(btn_edit)
-        btn_edit.clicked.connect(self.show_edit_window)
+            self.attributes_layout.addWidget(group_box)
 
     def show_edit_window(self):
         """
@@ -241,45 +241,7 @@ class AnnotationTool(QMainWindow):
             attribute_type = sender.property("attribute_type")
             option_name = sender.property("option_name")
 
-            # 增加互斥逻辑
-            if value:  # 当选中某个选项时
-                # 如果选中的是 "unknown"，则取消同组中其他选项
-                if option_name == "unknown":
-                    self.clear_other_options(attribute_type, "unknown")
-                # 如果选中的不是 "unknown"，则取消同组中的 "unknown" 选项
-                else:
-                    self.clear_option(attribute_type, "unknown")
-
             self.update_attribute_list(attribute_type, option_name, value)
-
-    def clear_other_options(self, attribute_type, except_option):
-        """
-        清除同一组中除了指定选项外的所有选项
-        """
-        # 查找所有带有相同 attribute_type 属性的复选框
-        for child in self.findChildren(QCheckBox):  # 获取当前窗口中所有复选框
-            if (child.property("attribute_type") == attribute_type and child.property("option_name") != except_option and child.isChecked()):
-                # 暂时断开信号连接，防止触发 toggled 信号引起循环
-                child.blockSignals(True)
-                child.setChecked(False)
-                child.blockSignals(False)
-                # 更新属性列表
-                self.update_attribute_list(
-                    attribute_type, child.property("option_name"), False)
-
-    def clear_option(self, attribute_type, option_name):
-        """
-        清除指定组中的指定选项
-        """
-        # 查找特定的复选框
-        for child in self.findChildren(QCheckBox):  # 获取当前窗口中所有复选框
-            if (child.property("attribute_type") == attribute_type and child.property("option_name") == option_name and child.isChecked()):
-                # 暂时断开信号连接，防止触发 toggled 信号引起循环
-                child.blockSignals(True)
-                child.setChecked(False)
-                child.blockSignals(False)
-                # 更新属性列表
-                self.update_attribute_list(attribute_type, option_name, False)
 
     def update_attribute_list(self, attribute_type, option_name, value):
         """
@@ -298,21 +260,6 @@ class AnnotationTool(QMainWindow):
         else:
             if option_name in self.image_attribute_dict[attribute_type]:
                 self.image_attribute_dict[attribute_type].remove(option_name)
-
-                # 如果移除后该属性组没有任何选项，则自动选中unknown选项
-                if not self.image_attribute_dict[attribute_type] and option_name != "unknown":
-                    # 查找unknown复选框并选中它
-                    for child in self.findChildren(QCheckBox):
-                        if (child.property("attribute_type") == attribute_type and
-                                child.property("option_name") == "unknown"):
-                            # 阻止信号以避免递归
-                            child.blockSignals(True)
-                            child.setChecked(True)
-                            child.blockSignals(False)
-                            # 更新属性列表
-                            self.image_attribute_dict[attribute_type].append(
-                                "unknown")
-                            break
 
         self.save_image_attribute()
 
@@ -342,48 +289,34 @@ class AnnotationTool(QMainWindow):
         except Exception as e:
             print(f"保存舌图属性时出错: {str(e)}")
 
-    def set_main_layout(self):
+    def import_attribute(self):
         """
-        设置主布局
+        导入属性文件（json或者Excel）
         """
-        self.v_layout = QVBoxLayout()
+        result = QFileDialog.getOpenFileName(
+            self,
+            "选择一个Json文件或者Excel文件",
+            "./",
+            "所有文件(*);;Json文件(*.json);;Excel文件(*.xlsx *.xls)",
+            "Json文件(*.json)"
+        )
 
-        self.add_label()
-        self.add_btn()
+        if isinstance(result, tuple) and result[0]:
+            # 导入成功后，读取文件内容
+            with open(result[0], "r", encoding="utf-8") as f:
+                self.attributes = json.load(f)
 
-        # 创建一个容器widget来包含布局
-        container = QWidget()
-        container.setObjectName('main_container')
-        container.setLayout(self.v_layout)  # 将布局设置到widget上
-
-        self.setCentralWidget(container)  # 将widget设置为中央窗口部件
-
-    def add_label(self):
-        """
-        添加标签
-        """
-        for i in range(1, 11):
-            label = QLabel(f"Label {i}")
-            self.v_layout.addWidget(label)
-
-    def add_btn(self):
-        """
-        添加按钮
-        """
-        self.btn = QPushButton("切换停靠控件")
-        self.btn.setObjectName("toggle_dock_btn")
-        self.btn.setCursor(Qt.PointingHandCursor)
-        self.btn.clicked.connect(self.toggle_dock)
-        self.v_layout.addWidget(self.btn)
+            self.btn_import.deleteLater()
+            self.set_attribute_group_box()
 
     def dock_visibility_changed(self, visible):
         """
         停靠窗口可见性变化时触发
         """
         if visible:
-            self.btn.setText("隐藏停靠窗口")
+            self.btn_toggle.setText("隐藏停靠窗口")
         else:
-            self.btn.setText("显示停靠窗口")
+            self.btn_toggle.setText("显示停靠窗口")
 
     def toggle_dock(self):
         """
