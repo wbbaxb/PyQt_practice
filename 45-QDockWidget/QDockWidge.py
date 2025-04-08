@@ -8,6 +8,7 @@ from Common.flowLayout import FlowLayout
 from attribut_edit_dialog import AttributeEditDialog
 from Common.utils import WindowUtils
 from attribute_config_helper import AttributeConfigHelper
+import shutil
 
 
 class AnnotationTool(QMainWindow):
@@ -61,7 +62,7 @@ class AnnotationTool(QMainWindow):
                 color: white;
                 border-radius: 10px;
             }}
-            
+
             QPushButton#edit_btn {{
                 background-color: green;
                 height: 30px;
@@ -70,14 +71,14 @@ class AnnotationTool(QMainWindow):
                 background-color: orange;
                 height: 50px;
             }}
-            
+
             QPushButton#edit_btn:hover, QPushButton#toggle_dock_btn:hover {{
                 background-color: rgb(73, 170, 159);
             }}
             QPushButton#edit_btn:pressed, QPushButton#toggle_dock_btn:pressed {{
                 background-color: rgb(234, 208, 112);
             }}
-            
+
             QGroupBox {{
                 font-size: {self.font_size}px;
                 border: 1px solid lightblue;
@@ -116,13 +117,16 @@ class AnnotationTool(QMainWindow):
         self.btn_toggle.clicked.connect(self.toggle_dock)
         self.main_layout.addWidget(self.btn_toggle)
 
-        if not self.attributes:
-            self.btn_import = QPushButton("尚未导入属性文件，点击导入")
-            self.btn_import.setCursor(Qt.PointingHandCursor)
-            self.btn_import.clicked.connect(self.import_attribute)
-            self.main_layout.addWidget(self.btn_import)
+        # if not self.attributes:
+        self.btn_import = QPushButton("尚未导入属性文件，点击导入")
+        self.btn_import.setCursor(Qt.PointingHandCursor)
+        self.btn_import.clicked.connect(self.import_attribute)
+        self.main_layout.addWidget(self.btn_import)
 
         self.set_dock_widget()
+
+        if self.attributes:
+            self.set_attribute_group_box()
 
     def set_dock_widget(self):
         """
@@ -301,13 +305,45 @@ class AnnotationTool(QMainWindow):
             "Json文件(*.json)"
         )
 
-        if isinstance(result, tuple) and result[0]:
-            # 导入成功后，读取文件内容
-            with open(result[0], "r", encoding="utf-8") as f:
-                self.attributes = json.load(f)
+        if not isinstance(result, tuple):
+            return
 
-            self.btn_import.deleteLater()
-            self.set_attribute_group_box()
+        file_path = result[0]
+
+        if not file_path:
+            return
+
+        if Path(file_path).suffix == ".json":
+            self.handle_json_file(file_path)
+        elif Path(file_path).suffix in [".xlsx", ".xls"]:
+            self.handle_excel_file(file_path)
+
+        if hasattr(self, 'btn_import'):
+            pass # debug code
+            # self.btn_import.deleteLater()
+
+        self.set_attribute_group_box()
+
+    def handle_json_file(self, file_path):
+        """
+        处理JSON文件
+        """
+        with open(file_path, "r", encoding="utf-8") as f:
+            self.attributes = json.load(f)
+
+        config_path = AttributeConfigHelper.get_config_path()
+        config_path.parent.mkdir(parents=True, exist_ok=True)  # 确保配置目录存在
+
+        try:
+            shutil.copy2(file_path, config_path)  # 复制源文件到目标路径，保留元数据，如果目标文件存在会被覆盖
+        except Exception as e:
+            AttributeConfigHelper.save_config(self.attributes)
+
+    def handle_excel_file(self, file_path):
+        """
+        处理Excel文件
+        """
+        print(f"处理Excel文件: {file_path}")
 
     def dock_visibility_changed(self, visible):
         """
