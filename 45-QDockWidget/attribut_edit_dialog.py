@@ -4,6 +4,7 @@ from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
 from edit_attribute import EditAttributeDialog
 from Common.custom_message_box import CustomMessageBox
+from attribute_config_helper import AttributeConfigHelper
 
 
 class AttributeEditDialog(QDialog):
@@ -194,4 +195,6 @@ class AttributeEditDialog(QDialog):
         result = dialog.exec_()
 
         if result == QDialog.Accepted:
-            pass
+            dict = {dialog.attribute_data[0]: dialog.attribute_data[1]}
+            self.attributes.update(dict) # 更新属性配置
+            AttributeConfigHelper.save_config(self.attributes)

@@ -16,7 +16,7 @@ class AttributeConfigHelper():
     def get_config_path():
         if os.name == 'nt':  # windows
             # os.environ['APPDATA'] 获取用户主目录
-            return Path(os.environ['APPDATA']) / "AnyLabeling" / "attribute.json"
+            return Path(os.environ['APPDATA']) / "AnyLabeling" / "attributes.json"
         else:
             raise OSError(f"不支持的操作系统: {os.name}")
 

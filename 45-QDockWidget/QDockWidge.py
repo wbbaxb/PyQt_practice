@@ -195,7 +195,7 @@ class AnnotationTool(QMainWindow):
             # 如果不是嵌套结构，直接使用attributes
             attribute_dict = self.attributes
 
-        # 先清空attributes_layout中的所有控件
+        # 清空attributes_layout中的所有控件
         while self.attributes_layout.count():
             item = self.attributes_layout.takeAt(0)
             widget = item.widget()

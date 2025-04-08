@@ -256,7 +256,7 @@ class EditAttributeDialog(QDialog):
 
     def confirm_add_attribute(self) -> tuple[str, list[str]]:
         """确认添加属性"""
-        attribute_name = self.name_input.text().strip()
+        attribute_name = self.name_input.text().strip() if self.mode == 0 else self.name_label.text()
 
         if not attribute_name:
             QMessageBox.warning(self, "警告", "请输入属性名!")
