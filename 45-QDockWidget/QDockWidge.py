@@ -5,10 +5,11 @@ import sys
 import json
 from pathlib import Path
 from Common.flowLayout import FlowLayout
-from attribut_edit_dialog import AttributeEditDialog
+from show_attributes_dialog import ShowAttributesDialog
 from Common.utils import WindowUtils
 from attribute_config_helper import AttributeConfigHelper
 import shutil
+import copy
 
 
 class AnnotationTool(QMainWindow):
@@ -164,7 +165,7 @@ class AnnotationTool(QMainWindow):
         self.btn_toggle.clicked.connect(self.toggle_dock)
         self.main_layout.addWidget(self.btn_toggle)
 
-        if self.attributes:
+        if not self.attributes:
             self.btn_import = QPushButton("尚未导入属性文件，点击导入")
             self.btn_import.setCursor(Qt.PointingHandCursor)
             self.btn_import.clicked.connect(self.import_attribute)
@@ -278,7 +279,8 @@ class AnnotationTool(QMainWindow):
         """
         显示编辑窗口,需要设置parent=self，否则编辑窗口会闪退
         """
-        dialog = AttributeEditDialog(attributes=self.attributes, parent=self)
+        attribute_clone = copy.deepcopy(self.attributes)  # 深拷贝
+        dialog = ShowAttributesDialog(attributes=attribute_clone, parent=self)
         # 连接信号
         dialog.attributes_changed.connect(self.handle_attributes_changed)
         WindowUtils.center_on_parent(dialog)

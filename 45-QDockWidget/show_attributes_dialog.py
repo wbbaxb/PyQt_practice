@@ -1,13 +1,13 @@
 from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget, QMessageBox, QLineEdit
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
-from edit_attribute import EditAttributeDialog
+from attribute_edit_dialog import AttributeEditDialog
 from Common.custom_message_box import CustomMessageBox
 from attribute_config_helper import AttributeConfigHelper
 
 
-class AttributeEditDialog(QDialog):
+class ShowAttributesDialog(QDialog):
     attributes_changed = pyqtSignal(dict)  # 属性变化信号
 
     def __init__(self, attributes: dict, parent=None):
@@ -127,7 +127,6 @@ class AttributeEditDialog(QDialog):
         btn_show_add_attribute_dialog.clicked.connect(
             self.show_add_attribute_dialog)
 
-        btn_show_add_attribute_dialog.setFocus()
         self.btn_add = btn_show_add_attribute_dialog
 
         btn_import_attribute = QPushButton("导入")
@@ -139,11 +138,12 @@ class AttributeEditDialog(QDialog):
         self.top_layout.addWidget(btn_import_attribute, 1)
 
         self.show_attributes(self.attributes[root_name])
+        btn_show_add_attribute_dialog.setFocus()
 
-    def update_parent_ui(self):
-        """更新父窗口的UI"""
-        if hasattr(self.parent(), 'reload_attribute_ui'):
-            self.parent().reload_attribute_ui()
+    def emit_attributes_changed(self):
+        """异步发送属性变化信号"""
+        QTimer.singleShot(
+            0, lambda: self.attributes_changed.emit(self.attributes))
 
     def update_root_name(self):
         new_root_name = self.root_name_intput.text()
@@ -158,7 +158,7 @@ class AttributeEditDialog(QDialog):
             self.attributes[new_root_name] = root_attributes
 
             AttributeConfigHelper.save_config(self.attributes)  # 保存配置
-            self.attributes_changed.emit(self.attributes)  # 发送信号
+            self.emit_attributes_changed()
 
             QMessageBox.information(self, "提示", f"根节点名称已更新为: {new_root_name}")
 
@@ -180,9 +180,6 @@ class AttributeEditDialog(QDialog):
         attr_name = attribute_item[0]
         attr_values = attribute_item[1]
 
-        # 在容器上直接存储属性名，方便后续查找
-        container.setProperty("attr_name", attr_name)
-
         label = QLabel(attr_name)
         label.setAlignment(Qt.AlignCenter)
         content_layout.addWidget(label)
@@ -194,16 +191,21 @@ class AttributeEditDialog(QDialog):
         btn_edit_attribute.setObjectName("editBtn")
         btn_edit_attribute.setCursor(Qt.PointingHandCursor)
         btn_edit_attribute.clicked.connect(self.show_edit_attribute_dialog)
-        btn_edit_attribute.setProperty("attribute_key", attribute_item)
+        btn_edit_attribute.setProperty("attr_name", attr_name)
+        btn_edit_attribute.setProperty("container", container)
         h_layout.addWidget(btn_edit_attribute)
 
         btn_delete_attribute = QPushButton("删除")
         btn_delete_attribute.setObjectName("deleteBtn")
         btn_delete_attribute.setCursor(Qt.PointingHandCursor)
         btn_delete_attribute.clicked.connect(self.delete_attribute)
+        btn_delete_attribute.setProperty("attr_name", attr_name)
         btn_delete_attribute.setProperty("container", container)
         h_layout.addWidget(btn_delete_attribute)
 
+        self.set_tooltip(container, attr_name, attr_values)
+
+    def set_tooltip(self, container: QWidget, attr_name: str, attr_values: list[str]):
         item_str = f"""
             <div style='background-color: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #2196F3;'>
                 <div style='color: #2196F3; font-weight: bold; font-size: 16px; margin-bottom: 8px; 
@@ -228,14 +230,14 @@ class AttributeEditDialog(QDialog):
         container.setToolTip(item_str)
 
     def delete_attribute(self):
+        sender = self.sender()
+        container = sender.property("container")
+        attr_name = sender.property("attr_name")
+
         message_box = CustomMessageBox(self)
-        result = message_box.exec("提示", "确定删除该属性吗？")
+        result = message_box.exec("提示", f"确定删除: {attr_name} 吗？")
 
         if result == QMessageBox.Yes:
-            # 获取发送信号的按钮
-            sender = self.sender()
-            container = sender.property("container")
-            attr_name = container.property("attr_name")
 
             self.grid_layout.removeWidget(container)
             container.hide()
@@ -248,7 +250,7 @@ class AttributeEditDialog(QDialog):
             if attr_name in self.attributes[root_name]:
                 del self.attributes[root_name][attr_name]
                 AttributeConfigHelper.save_config(self.attributes)
-                self.attributes_changed.emit(self.attributes)  # 发送信号
+                self.emit_attributes_changed()
 
             self.btn_add.setFocus()
 
@@ -259,7 +261,7 @@ class AttributeEditDialog(QDialog):
         print("导入属性")
 
     def show_add_attribute_dialog(self):
-        dialog = EditAttributeDialog(
+        dialog = AttributeEditDialog(
             parent=self, mode=0, exits_attributes=self.attributes.keys())
         # dialog.setWindowModality(Qt.ApplicationModal)
         # dialog.show() # 即使设置了setWindowModality(Qt.ApplicationModal)，
@@ -272,19 +274,46 @@ class AttributeEditDialog(QDialog):
             attribute_data = dialog.attribute_data
             self.add_attribute(attribute_data)
 
-    def show_edit_attribute_dialog(self):
-        # 获取发送信号的按钮
-        sender = self.sender()
-        # 获取按钮的属性
-        attribute_item = sender.property("attribute_key")
-
-        dialog = EditAttributeDialog(
-            parent=self, mode=1, attribute_item=attribute_item)
-
-        result = dialog.exec_()
-
-        if result == QDialog.Accepted:
-            dict = {dialog.attribute_data[0]: dialog.attribute_data[1]}
-            self.attributes.update(dict)  # 更新属性配置
+            # 将attribute_data添加到self.attributes中
+            root_name = next(iter(self.attributes.keys()))
+            self.attributes[root_name][attribute_data[0]] = attribute_data[1]
+            
+            # 保存配置并发送信号
             AttributeConfigHelper.save_config(self.attributes)
-            self.attributes_changed.emit(self.attributes)  # 发送信号
+            self.emit_attributes_changed()
+
+    def show_edit_attribute_dialog(self):
+        sender = self.sender()
+        attr_name = sender.property("attr_name")
+        container = sender.property("container")
+        root_name = next(iter(self.attributes.keys()))
+
+        # 从数据源获取属性值
+        if attr_name in self.attributes[root_name]:
+            attr_values = self.attributes[root_name][attr_name]
+            attribute_item = (attr_name, attr_values)
+
+            dialog = AttributeEditDialog(
+                parent=self, mode=1, attribute_item=attribute_item)
+
+            result = dialog.exec_()
+
+            if result == QDialog.Accepted:
+                # 获取新属性数据
+                new_attr_name = dialog.attribute_data[0]
+                new_attr_values = dialog.attribute_data[1]
+
+                # 如果属性名改变了，需要删除旧的属性
+                if attr_name != new_attr_name:
+                    del self.attributes[root_name][attr_name]
+
+                # 更新属性值
+                self.attributes[root_name][new_attr_name] = new_attr_values
+
+                # 保存配置并发送信号
+                AttributeConfigHelper.save_config(self.attributes)
+                self.emit_attributes_changed()
+
+                self.set_tooltip(container, new_attr_name, new_attr_values)
+        else:
+            QMessageBox.warning(self, "警告", f"找不到属性: {attr_name}")

@@ -6,7 +6,7 @@ from customitem_widget import CustomItemWidget
 from Common.utils import WindowUtils
 
 
-class EditAttributeDialog(QDialog):
+class AttributeEditDialog(QDialog):
     def __init__(self, parent=None, mode: int = 0, exits_attributes: list[str] = None, attribute_item: tuple[str, list[str]] = None):
         """
         mode: 0 添加属性 1 编辑属性
@@ -24,14 +24,9 @@ class EditAttributeDialog(QDialog):
         self.setup_ui()
         self.init_attribute_item()
         self.setup_style()
-        
 
     def setup_style(self):
-        """
-        防止继承父对话框的样式
-        """
         self.setStyleSheet(f"""
-            /* 重置从父对话框继承的样式 */
             #editAttributeDialog, #nameGroup, #valuesGroup, #nameInput, #valueInput, #valuesList {{
                 background-color: white;
             }}
@@ -247,7 +242,7 @@ class EditAttributeDialog(QDialog):
         custom_widget = CustomItemWidget(value)
         self.values_list.setItemWidget(item, custom_widget)
 
-        # 设置更合适的大小提示，以确保QFrame正确居中显示
+        # 确保QFrame正确居中显示
         size = custom_widget.get_size()
         item.setSizeHint(size)
 
@@ -256,7 +251,8 @@ class EditAttributeDialog(QDialog):
 
     def confirm_add_attribute(self) -> tuple[str, list[str]]:
         """确认添加属性"""
-        attribute_name = self.name_input.text().strip() if self.mode == 0 else self.name_label.text()
+        attribute_name = self.name_input.text().strip(
+        ) if self.mode == 0 else self.name_label.text()
 
         if not attribute_name:
             QMessageBox.warning(self, "警告", "请输入属性名!")
@@ -278,12 +274,3 @@ class EditAttributeDialog(QDialog):
 
     def cancel(self):
         self.reject()
-
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    dialog = EditAttributeDialog()
-    dialog.show()
-    sys.exit(app.exec_())
