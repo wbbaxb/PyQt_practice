@@ -6,7 +6,7 @@ from pathlib import Path
 class AttributeConfigHelper():
     """
     属性文件操作类
-    只支持windows系统,其他系统没有测试条件
+    只支持windows系统
     """
 
     def __init__(self) -> None:

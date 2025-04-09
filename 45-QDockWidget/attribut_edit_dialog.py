@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget, QMessageBox
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget, QMessageBox, QLineEdit
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
 from edit_attribute import EditAttributeDialog
@@ -8,22 +8,16 @@ from attribute_config_helper import AttributeConfigHelper
 
 
 class AttributeEditDialog(QDialog):
+    attributes_changed = pyqtSignal(dict)  # 属性变化信号
+
     def __init__(self, attributes: dict, parent=None):
         super().__init__(parent=parent)
         self.attributes = attributes
         self.font_size = 16
+        self.setup_style()
         self.setup_ui()
-        self.show_attributes()
 
-    def setup_ui(self):
-        self.setWindowTitle("属性编辑")
-        self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
-        self.resize(800, 600)
-        self.setMinimumHeight(400)  # 设置最小高度，否则无法调整高度
-        self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
-                            Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
-
-        # 整体应用样式
+    def setup_style(self):
         self.setStyleSheet(f"""
             QWidget#attributeContainer {{
                 border: 2px solid orange;
@@ -42,7 +36,7 @@ class AttributeEditDialog(QDialog):
                 padding: 10px 20px;
                 font-size: {self.font_size}px;
                 font-weight: normal;
-                background-color: #2196F3;
+                background-color: #2196F3; /* 蓝色 */
             }}
             QPushButton:hover {{
                 background-color: rgb(73, 170, 159);
@@ -70,12 +64,59 @@ class AttributeEditDialog(QDialog):
             QPushButton#deleteBtn:pressed {{
                 background-color: rgb(206, 200, 229);
             }}
+            QLabel#rootNameLabel {{
+                font-size: {self.font_size}px;
+                font-weight: normal;
+                color: black;
+            }}
+            QPushButton#saveBtn:disabled {{
+                background-color: #f0f0f0; /* 灰色 */
+            }}
+            QLineEdit#rootNameInput {{
+                border: 1px solid #2196F3; /* 蓝色 */
+                border-radius: 5px;
+                height: 35px;
+                font-size: {self.font_size}px;
+            }}
         """)
+
+    def setup_ui(self):
+        self.setWindowTitle("属性编辑")
+        self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
+        self.resize(800, 600)
+        self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
+                            Qt.WindowMaximizeButtonHint | Qt.WindowCloseButtonHint)
 
         self.main_layout = QVBoxLayout()
         self.setLayout(self.main_layout)
+
         self.top_layout = QHBoxLayout()
         self.main_layout.addLayout(self.top_layout)
+
+        root_name_layout = QHBoxLayout()
+        root_name_layout.setContentsMargins(0, 20, 0, 20)  # 设置布局上下边距为20
+        self.main_layout.addLayout(root_name_layout)
+
+        root_name_label = QLabel("根节点:")
+        root_name_label.setObjectName("rootNameLabel")
+        root_name_label.setAlignment(Qt.AlignCenter)
+        root_name_layout.addWidget(root_name_label)
+
+        root_name = next(iter(self.attributes.keys()))
+        self.root_name_intput = QLineEdit(root_name)
+        self.root_name_intput.setObjectName("rootNameInput")
+        self.root_name_intput.setPlaceholderText("请输入根节点名称")
+        root_name_layout.addWidget(self.root_name_intput)
+
+        btn_save_root_name = QPushButton("保存")
+        btn_save_root_name.setObjectName("saveBtn")
+        btn_save_root_name.setFixedHeight(35)
+        btn_save_root_name.setCursor(Qt.PointingHandCursor)
+        btn_save_root_name.clicked.connect(self.update_root_name)
+        root_name_layout.addWidget(btn_save_root_name)
+
+        self.root_name_intput.textChanged.connect(
+            lambda: btn_save_root_name.setEnabled(self.root_name_intput.text() != ""))
 
         self.grid_layout = UniformGridLayout()
         self.grid_layout.setSpacing(30)
@@ -86,6 +127,9 @@ class AttributeEditDialog(QDialog):
         btn_show_add_attribute_dialog.clicked.connect(
             self.show_add_attribute_dialog)
 
+        btn_show_add_attribute_dialog.setFocus()
+        self.btn_add = btn_show_add_attribute_dialog
+
         btn_import_attribute = QPushButton("导入")
         btn_import_attribute.setObjectName("importBtn")
         btn_import_attribute.setCursor(Qt.PointingHandCursor)
@@ -94,28 +138,57 @@ class AttributeEditDialog(QDialog):
         self.top_layout.addWidget(btn_show_add_attribute_dialog, 1)
         self.top_layout.addWidget(btn_import_attribute, 1)
 
-    def show_attributes(self):
+        self.show_attributes(self.attributes[root_name])
+
+    def update_parent_ui(self):
+        """更新父窗口的UI"""
+        if hasattr(self.parent(), 'reload_attribute_ui'):
+            self.parent().reload_attribute_ui()
+
+    def update_root_name(self):
+        new_root_name = self.root_name_intput.text()
+        old_root_name = next(iter(self.attributes.keys()))  # 始终从字典中获取根节点名称
+
+        if new_root_name != old_root_name:
+            # 获取旧键对应的值
+            root_attributes = self.attributes[old_root_name]
+            # 删除旧键
+            del self.attributes[old_root_name]
+            # 添加新键，值保持不变
+            self.attributes[new_root_name] = root_attributes
+
+            AttributeConfigHelper.save_config(self.attributes)  # 保存配置
+            self.attributes_changed.emit(self.attributes)  # 发送信号
+
+            QMessageBox.information(self, "提示", f"根节点名称已更新为: {new_root_name}")
+
+    def show_attributes(self, attributes: dict):
         """
         显示所有属性
         """
-        for item in self.attributes.items():
+        for item in attributes.items():
             self.add_attribute(item)
 
     def add_attribute(self, attribute_item: tuple[str, list[str]]):
         container = QWidget()
-        # 设置对象名称以应用特定样式，只对容器设置边框，不影响子控件
         container.setObjectName("attributeContainer")
-        main_layout = QVBoxLayout()
-        main_layout.setContentsMargins(10, 10, 10, 10)  # 增加内边距
-        container.setLayout(main_layout)
+        content_layout = QVBoxLayout()
+        content_layout.setContentsMargins(10, 10, 10, 10)
+        container.setLayout(content_layout)
         self.grid_layout.addWidget(container)
 
-        label = QLabel(attribute_item[0])
+        attr_name = attribute_item[0]
+        attr_values = attribute_item[1]
+
+        # 在容器上直接存储属性名，方便后续查找
+        container.setProperty("attr_name", attr_name)
+
+        label = QLabel(attr_name)
         label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(label)
+        content_layout.addWidget(label)
 
         h_layout = QHBoxLayout()
-        main_layout.addLayout(h_layout)
+        content_layout.addLayout(h_layout)
 
         btn_edit_attribute = QPushButton("编辑")
         btn_edit_attribute.setObjectName("editBtn")
@@ -128,11 +201,8 @@ class AttributeEditDialog(QDialog):
         btn_delete_attribute.setObjectName("deleteBtn")
         btn_delete_attribute.setCursor(Qt.PointingHandCursor)
         btn_delete_attribute.clicked.connect(self.delete_attribute)
-        btn_delete_attribute.setProperty("attribute_key", container)
+        btn_delete_attribute.setProperty("container", container)
         h_layout.addWidget(btn_delete_attribute)
-
-        attr_name = attribute_item[0]
-        attr_values = attribute_item[1]
 
         item_str = f"""
             <div style='background-color: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #2196F3;'>
@@ -164,9 +234,26 @@ class AttributeEditDialog(QDialog):
         if result == QMessageBox.Yes:
             # 获取发送信号的按钮
             sender = self.sender()
-            # 获取按钮的属性,QWidget对象
-            container = sender.property("attribute_key")
+            container = sender.property("container")
+            attr_name = container.property("attr_name")
+
             self.grid_layout.removeWidget(container)
+            container.hide()
+            container.deleteLater()
+
+            # 获取根节点名
+            root_name = next(iter(self.attributes.keys()))
+
+            # 删除属性数据
+            if attr_name in self.attributes[root_name]:
+                del self.attributes[root_name][attr_name]
+                AttributeConfigHelper.save_config(self.attributes)
+                self.attributes_changed.emit(self.attributes)  # 发送信号
+
+            self.btn_add.setFocus()
+
+            if attr_name in self.attributes[root_name]:
+                QMessageBox.critical(self, "提示", f"属性: {attr_name} 删除失败")
 
     def import_attribute(self):
         print("导入属性")
@@ -190,11 +277,14 @@ class AttributeEditDialog(QDialog):
         sender = self.sender()
         # 获取按钮的属性
         attribute_item = sender.property("attribute_key")
+
         dialog = EditAttributeDialog(
             parent=self, mode=1, attribute_item=attribute_item)
+
         result = dialog.exec_()
 
         if result == QDialog.Accepted:
             dict = {dialog.attribute_data[0]: dialog.attribute_data[1]}
-            self.attributes.update(dict) # 更新属性配置
+            self.attributes.update(dict)  # 更新属性配置
             AttributeConfigHelper.save_config(self.attributes)
+            self.attributes_changed.emit(self.attributes)  # 发送信号

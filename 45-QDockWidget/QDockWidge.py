@@ -135,16 +135,16 @@ class AnnotationTool(QMainWindow):
         """
         # 设置主布局
         self.set_main_layout()
-        
+
         # 设置停靠窗口
         self.set_dock_widget()
-        
+
         # 添加编辑按钮组
         self.add_edit_group_box()
-        
+
         # 如果有属性数据，添加属性组框
         if self.attributes:
-            self.add_attribute_group_box()
+            self.set_attribute_group_box()
 
     def set_main_layout(self):
         """
@@ -164,7 +164,7 @@ class AnnotationTool(QMainWindow):
         self.btn_toggle.clicked.connect(self.toggle_dock)
         self.main_layout.addWidget(self.btn_toggle)
 
-        if not self.attributes:
+        if self.attributes:
             self.btn_import = QPushButton("尚未导入属性文件，点击导入")
             self.btn_import.setCursor(Qt.PointingHandCursor)
             self.btn_import.clicked.connect(self.import_attribute)
@@ -208,69 +208,69 @@ class AnnotationTool(QMainWindow):
         edit_layout.addWidget(btn_edit)
         btn_edit.clicked.connect(self.show_edit_window)
 
-    def add_attribute_group_box(self):
+    def set_attribute_group_box(self):
         """
         添加属性组框
         """
         if not self.attributes:
             return
 
-        # 创建根节点"舌头"的GroupBox
-        self.root_name = next(iter(self.attributes.keys()))
-        root_group_box = QGroupBox(self.root_name)
+        # 创建根节点GroupBox
+        root_name = next(iter(self.attributes.keys()))
+        root_group_box = QGroupBox(root_name)
         root_group_box.setObjectName("root_group_box")
-        
+
         # 为根节点创建布局
         root_layout = QVBoxLayout()
         root_group_box.setLayout(root_layout)
 
         # 添加根节点GroupBox到停靠窗口布局
         self.dock_layout.addWidget(root_group_box)
-                
+
         self.dock_layout.setStretch(0, 1)  # 编辑按钮区域
         self.dock_layout.setStretch(1, 10)  # 属性区域
-        
+
         # 创建滚动区域
         scroll = QScrollArea()
         scroll.setObjectName("scroll_area")
         scroll.setWidgetResizable(True)
-        
+
         # 创建滚动区域的内容控件
         content = QWidget()
         content_layout = QVBoxLayout()
         content.setLayout(content_layout)
-        
-        # 获取舌头下的属性数据
-        root_data = self.attributes[self.root_name]
-        
+
+        # 获取根节点下的属性数据
+        root_data = self.attributes[root_name]
+
         # 添加属性组框
         for key, val in root_data.items():
             attr_group_box = QGroupBox(key)
             content_layout.addWidget(attr_group_box)
-            
+
             # 使用FlowLayout来布局选项
             flow_layout = FlowLayout(spacing=20)
             attr_group_box.setLayout(flow_layout)
-            
+
             # 添加选项
             for option in val:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
-                
+
                 # 设置属性存储分类名称和选项名称
                 check_box.setProperty("attribute_type", key)
                 check_box.setProperty("option_name", option)
-                
+
                 if key in self.image_attribute_dict:
                     if option in self.image_attribute_dict[key]:
                         check_box.setChecked(True)
-                
+
                 check_box.toggled.connect(self.check_box_toggled)
                 flow_layout.addWidget(check_box)
-        
+
         # 设置滚动区域的内容控件
         scroll.setWidget(content)
-        
+
         # 将滚动区域添加到根节点布局中
         root_layout.addWidget(scroll)
 
@@ -279,8 +279,17 @@ class AnnotationTool(QMainWindow):
         显示编辑窗口,需要设置parent=self，否则编辑窗口会闪退
         """
         dialog = AttributeEditDialog(attributes=self.attributes, parent=self)
+        # 连接信号
+        dialog.attributes_changed.connect(self.handle_attributes_changed)
         WindowUtils.center_on_parent(dialog)
         dialog.exec()
+
+    def handle_attributes_changed(self, new_attributes):
+        """
+        处理属性变化信号
+        """
+        self.attributes = new_attributes
+        self.reload_attribute_ui()
 
     def check_box_toggled(self, value):
         """
@@ -376,9 +385,9 @@ class AnnotationTool(QMainWindow):
         """
         result = QFileDialog.getOpenFileName(
             self,
-            "选择一个Json文件或者Excel文件",
+            "选择Json或者Excel文件",
             "./",
-            "所有文件(*);;Json文件(*.json);;Excel文件(*.xlsx *.xls)",
+            "Json文件(*.json);;Excel文件(*.xlsx *.xls)",
             "Json文件(*.json)"
         )
 
@@ -394,27 +403,32 @@ class AnnotationTool(QMainWindow):
             self.handle_json_file(file_path)
         elif Path(file_path).suffix in [".xlsx", ".xls"]:
             self.handle_excel_file(file_path)
+        else:
+            print(f"不支持的文件类型: {file_path}")
+            return
 
         if hasattr(self, 'btn_import'):
-            pass  # debug code
-            # self.btn_import.deleteLater()
+            self.btn_import.deleteLater()
 
-        # 重新加载属性UI
         self.reload_attribute_ui()
-        
+
     def reload_attribute_ui(self):
         """
         重新加载属性UI
         """
-        # 清除当前dock_layout中除了编辑按钮之外的所有控件
-        if self.dock_layout.count() > 1:  # 第0个是编辑按钮布局
-            for i in range(self.dock_layout.count()-1, 0, -1):
-                item = self.dock_layout.itemAt(i)
-                if item.widget():
-                    item.widget().deleteLater()
-                    
+
+        # 清除根节点GroupBox
+        for i in range(self.dock_layout.count() - 1, -1, -1):  # 从后往前遍历，步长为-1
+            item = self.dock_layout.itemAt(i)
+            widget = item.widget()
+            # 如果widget是QGroupBox，并且objectName为root_group_box，则删除widget
+            if widget and isinstance(widget, QGroupBox) and widget.objectName() == "root_group_box":
+                widget.deleteLater()
+                self.dock_layout.removeItem(item)
+                break
+
         # 重新添加属性组框
-        self.add_attribute_group_box()
+        self.set_attribute_group_box()
 
     def handle_json_file(self, file_path):
         """
