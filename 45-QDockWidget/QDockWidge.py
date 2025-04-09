@@ -7,7 +7,7 @@ from pathlib import Path
 from Common.flowLayout import FlowLayout
 from show_attributes_dialog import ShowAttributesDialog
 from Common.utils import WindowUtils
-from attribute_config_helper import AttributeConfigHelper
+from Common.attribute_config_helper import AttributeConfigHelper
 import shutil
 import copy
 

@@ -1,10 +1,14 @@
-from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget, QMessageBox, QLineEdit
+from PyQt5.QtWidgets import QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLabel, QWidget, QMessageBox, QLineEdit, QFileDialog
 from PyQt5.QtCore import Qt, pyqtSignal, QTimer
 from PyQt5.QtGui import QIcon
 from Common.UniformGridLayout import UniformGridLayout
 from attribute_edit_dialog import AttributeEditDialog
 from Common.custom_message_box import CustomMessageBox
-from attribute_config_helper import AttributeConfigHelper
+from Common.attribute_config_helper import AttributeConfigHelper
+from Common.excel_helper import ExcelHelper
+from pathlib import Path
+import json
+import shutil
 
 
 class ShowAttributesDialog(QDialog):
@@ -137,7 +141,7 @@ class ShowAttributesDialog(QDialog):
         self.top_layout.addWidget(btn_show_add_attribute_dialog, 1)
         self.top_layout.addWidget(btn_import_attribute, 1)
 
-        self.show_attributes(self.attributes[root_name])
+        self.show_attributes()
         btn_show_add_attribute_dialog.setFocus()
 
     def emit_attributes_changed(self):
@@ -162,10 +166,22 @@ class ShowAttributesDialog(QDialog):
 
             QMessageBox.information(self, "提示", f"根节点名称已更新为: {new_root_name}")
 
-    def show_attributes(self, attributes: dict):
+    def show_attributes(self):
         """
         显示所有属性
         """
+
+        root_name = next(iter(self.attributes.keys()))
+        attributes = self.attributes[root_name]
+
+        # 清空布局中的所有控件
+        for i in reversed(range(self.grid_layout.count())):
+            widget = self.grid_layout.itemAt(i).widget()
+            if widget:
+                self.grid_layout.removeWidget(widget)
+                widget.hide()
+                widget.deleteLater()
+
         for item in attributes.items():
             self.add_attribute(item)
 
@@ -238,15 +254,12 @@ class ShowAttributesDialog(QDialog):
         result = message_box.exec("提示", f"确定删除: {attr_name} 吗？")
 
         if result == QMessageBox.Yes:
-
             self.grid_layout.removeWidget(container)
             container.hide()
             container.deleteLater()
 
-            # 获取根节点名
             root_name = next(iter(self.attributes.keys()))
 
-            # 删除属性数据
             if attr_name in self.attributes[root_name]:
                 del self.attributes[root_name][attr_name]
                 AttributeConfigHelper.save_config(self.attributes)
@@ -258,7 +271,57 @@ class ShowAttributesDialog(QDialog):
                 QMessageBox.critical(self, "提示", f"属性: {attr_name} 删除失败")
 
     def import_attribute(self):
-        print("导入属性")
+        """
+        导入属性文件（json或者Excel）
+        """
+
+        result = QFileDialog.getOpenFileName(
+            self,
+            "选择Json或者Excel文件",
+            "./",
+            "Json文件(*.json);;Excel文件(*.xlsx *.xls)",
+            "Json文件(*.json)"
+        )
+
+        if not isinstance(result, tuple):
+            return
+
+        file_path = result[0]
+
+        if not file_path:
+            return
+
+        if Path(file_path).suffix == ".json":
+            self.handle_json_file(file_path)
+        elif Path(file_path).suffix in [".xlsx", ".xls"]:
+            self.handle_excel_file(file_path)
+        else:
+            print(f"不支持的文件类型: {file_path}")
+            return
+
+    def handle_json_file(self, file_path):
+        """
+        处理JSON文件
+        """
+        with open(file_path, "r", encoding="utf-8") as f:
+            self.attributes = json.load(f)
+
+        config_path = AttributeConfigHelper.get_config_path()
+        config_path.parent.mkdir(parents=True, exist_ok=True)  # 确保配置目录存在
+
+        try:
+            # 复制源文件到目标路径，保留元数据，如果目标文件存在会被覆盖
+            shutil.copy2(file_path, config_path)
+        except Exception as e:
+            AttributeConfigHelper.save_config(self.attributes)
+
+        self.show_attributes()
+
+    def handle_excel_file(self, file_path):
+        """
+        处理Excel文件
+        """
+        print(f"处理Excel文件: {file_path}")
 
     def show_add_attribute_dialog(self):
         dialog = AttributeEditDialog(
@@ -277,7 +340,7 @@ class ShowAttributesDialog(QDialog):
             # 将attribute_data添加到self.attributes中
             root_name = next(iter(self.attributes.keys()))
             self.attributes[root_name][attribute_data[0]] = attribute_data[1]
-            
+
             # 保存配置并发送信号
             AttributeConfigHelper.save_config(self.attributes)
             self.emit_attributes_changed()
