@@ -39,7 +39,7 @@ class AttributeConfigHelper():
             if not key:
                 return {}
 
-            return attributes.get(key, {})
+            return attributes
 
     @staticmethod
     def save_config(data):

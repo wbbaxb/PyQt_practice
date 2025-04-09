@@ -23,35 +23,6 @@ class AnnotationTool(QMainWindow):
         self.setup_style()
         self.setup_ui()
 
-    def load_image_attribute(self):
-        """
-        加载图片属性文件
-        """
-
-        if not self.image_attribute_path.exists():
-            print(f"图片标注文件不存在: {self.image_attribute_path}")
-            return
-
-        with open(self.image_attribute_path, "r", encoding="utf-8") as f:
-            image_data = json.load(f)
-
-            shapes = image_data.get("shapes", [])
-
-            if not shapes:
-                return
-
-            attributes = shapes[0].get("attributes", {})
-
-            if not attributes:
-                return
-
-            # 为了兼容之前标注过的舌图JSON文件,处理字符串或者列表
-            for key, val in attributes.items():
-                if isinstance(val, str):
-                    self.image_attribute_dict[key] = [val]
-                elif isinstance(val, list):
-                    self.image_attribute_dict[key] = val
-
     def setup_style(self):
         self.setStyleSheet(f"""
             QCheckBox {{
@@ -96,13 +67,89 @@ class AnnotationTool(QMainWindow):
             QWidget#main_container {{
                 background-color: lightblue;
             }}
+            QScrollArea#scroll_area {{
+                border: 0px;
+            }}
+            QGroupBox#root_group_box {{
+                padding: 10px 0px; 
+                border: 1px solid red;
+            }}
+            QGroupBox#root_group_box::title {{
+                background-color: red;
+            }}
+            
+            /* 滚动条样式 */
+            QScrollBar:vertical {{
+                background: #F0F0F0;
+                width: 12px;
+                margin: 0px 0px 0px 0px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:vertical {{
+                background: #C0C0C0;
+                min-height: 30px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:vertical:hover {{
+                background: #A0A0A0;
+            }}
+            QScrollBar::handle:vertical:pressed {{
+                background: #808080;
+            }}
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+                height: 0px;
+            }}
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
+                background: none;
+            }}
+            
+            /* 水平滚动条样式 */
+            QScrollBar:horizontal {{
+                background: #F0F0F0;
+                height: 12px;
+                margin: 0px 0px 0px 0px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:horizontal {{
+                background: #C0C0C0;
+                min-width: 30px;
+                border-radius: 6px;
+            }}
+            QScrollBar::handle:horizontal:hover {{
+                background: #A0A0A0;
+            }}
+            QScrollBar::handle:horizontal:pressed {{
+                background: #808080;
+            }}
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+                width: 0px;
+            }}
+            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+                background: none;
+            }}
         """)
 
     def setup_ui(self):
         """
         初始化UI
         """
+        # 设置主布局
+        self.set_main_layout()
+        
+        # 设置停靠窗口
+        self.set_dock_widget()
+        
+        # 添加编辑按钮组
+        self.add_edit_group_box()
+        
+        # 如果有属性数据，添加属性组框
+        if self.attributes:
+            self.add_attribute_group_box()
 
+    def set_main_layout(self):
+        """
+        设置主布局
+        """
         self.main_layout = QVBoxLayout()
 
         container = QWidget()
@@ -117,16 +164,11 @@ class AnnotationTool(QMainWindow):
         self.btn_toggle.clicked.connect(self.toggle_dock)
         self.main_layout.addWidget(self.btn_toggle)
 
-        # if not self.attributes:
-        self.btn_import = QPushButton("尚未导入属性文件，点击导入")
-        self.btn_import.setCursor(Qt.PointingHandCursor)
-        self.btn_import.clicked.connect(self.import_attribute)
-        self.main_layout.addWidget(self.btn_import)
-
-        self.set_dock_widget()
-
-        if self.attributes:
-            self.set_attribute_group_box()
+        if not self.attributes:
+            self.btn_import = QPushButton("尚未导入属性文件，点击导入")
+            self.btn_import.setCursor(Qt.PointingHandCursor)
+            self.btn_import.clicked.connect(self.import_attribute)
+            self.main_layout.addWidget(self.btn_import)
 
     def set_dock_widget(self):
         """
@@ -147,34 +189,18 @@ class AnnotationTool(QMainWindow):
         self.dock_layout = QVBoxLayout()
         self.dock_container.setLayout(self.dock_layout)
 
-        self.add_edit_group_box()
-
-        # 创建滚动区域容器
-        scroll = QScrollArea()
-        content = QWidget()
-
-        # 创建布局并设置给内容控件
-        self.attributes_layout = QVBoxLayout()
-        content.setLayout(self.attributes_layout)
-
-        scroll.setWidget(content)  # 设置滚动区域的部件为content
-        scroll.setWidgetResizable(True)  # 设置滚动区域部件是否可调整大小
-
-        # 将滚动区域添加到dock_layout中
-        self.dock_layout.addWidget(scroll)
-
     def add_edit_group_box(self):
         """
         添加编辑组框
         """
 
-        self.v_layout = QVBoxLayout()
-        self.v_layout.setSpacing(30)
-        self.dock_layout.addLayout(self.v_layout)
+        v_layout = QVBoxLayout()
+        v_layout.setSpacing(30)
+        self.dock_layout.addLayout(v_layout)
         edit_group_box = QGroupBox("编辑")
         edit_layout = QVBoxLayout()
         edit_group_box.setLayout(edit_layout)
-        self.v_layout.addWidget(edit_group_box)
+        v_layout.addWidget(edit_group_box)
 
         btn_edit = QPushButton("编辑")
         btn_edit.setCursor(Qt.PointingHandCursor)
@@ -182,49 +208,71 @@ class AnnotationTool(QMainWindow):
         edit_layout.addWidget(btn_edit)
         btn_edit.clicked.connect(self.show_edit_window)
 
-    def set_attribute_group_box(self):
+    def add_attribute_group_box(self):
         """
-        设置属性组框
+        添加属性组框
         """
-        # 检查attributes是否有嵌套结构
-        if len(self.attributes) == 1 and isinstance(next(iter(self.attributes.values())), dict):
-            # 如果是嵌套结构，获取第一个键对应的值作为属性字典
-            first_key = next(iter(self.attributes.keys()))
-            attribute_dict = self.attributes[first_key]
-        else:
-            # 如果不是嵌套结构，直接使用attributes
-            attribute_dict = self.attributes
+        if not self.attributes:
+            return
 
-        # 清空attributes_layout中的所有控件
-        while self.attributes_layout.count():
-            item = self.attributes_layout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
+        # 创建根节点"舌头"的GroupBox
+        self.root_name = next(iter(self.attributes.keys()))
+        root_group_box = QGroupBox(self.root_name)
+        root_group_box.setObjectName("root_group_box")
+        
+        # 为根节点创建布局
+        root_layout = QVBoxLayout()
+        root_group_box.setLayout(root_layout)
 
-        for key, val in attribute_dict.items():
-            group_box = QGroupBox(key)
-
+        # 添加根节点GroupBox到停靠窗口布局
+        self.dock_layout.addWidget(root_group_box)
+                
+        self.dock_layout.setStretch(0, 1)  # 编辑按钮区域
+        self.dock_layout.setStretch(1, 10)  # 属性区域
+        
+        # 创建滚动区域
+        scroll = QScrollArea()
+        scroll.setObjectName("scroll_area")
+        scroll.setWidgetResizable(True)
+        
+        # 创建滚动区域的内容控件
+        content = QWidget()
+        content_layout = QVBoxLayout()
+        content.setLayout(content_layout)
+        
+        # 获取舌头下的属性数据
+        root_data = self.attributes[self.root_name]
+        
+        # 添加属性组框
+        for key, val in root_data.items():
+            attr_group_box = QGroupBox(key)
+            content_layout.addWidget(attr_group_box)
+            
+            # 使用FlowLayout来布局选项
             flow_layout = FlowLayout(spacing=20)
-
+            attr_group_box.setLayout(flow_layout)
+            
             # 添加选项
             for option in val:
                 check_box = QCheckBox(option)
                 check_box.setCursor(Qt.PointingHandCursor)
-
+                
                 # 设置属性存储分类名称和选项名称
                 check_box.setProperty("attribute_type", key)
                 check_box.setProperty("option_name", option)
-
+                
                 if key in self.image_attribute_dict:
                     if option in self.image_attribute_dict[key]:
                         check_box.setChecked(True)
-
+                
                 check_box.toggled.connect(self.check_box_toggled)
                 flow_layout.addWidget(check_box)
-
-            group_box.setLayout(flow_layout)
-            self.attributes_layout.addWidget(group_box)
+        
+        # 设置滚动区域的内容控件
+        scroll.setWidget(content)
+        
+        # 将滚动区域添加到根节点布局中
+        root_layout.addWidget(scroll)
 
     def show_edit_window(self):
         """
@@ -266,6 +314,35 @@ class AnnotationTool(QMainWindow):
                 self.image_attribute_dict[attribute_type].remove(option_name)
 
         self.save_image_attribute()
+
+    def load_image_attribute(self):
+        """
+        加载图片属性文件
+        """
+
+        if not self.image_attribute_path.exists():
+            print(f"图片标注文件不存在: {self.image_attribute_path}")
+            return
+
+        with open(self.image_attribute_path, "r", encoding="utf-8") as f:
+            image_data = json.load(f)
+
+            shapes = image_data.get("shapes", [])
+
+            if not shapes:
+                return
+
+            attributes = shapes[0].get("attributes", {})
+
+            if not attributes:
+                return
+
+            # 为了兼容之前标注过的舌图JSON文件,处理字符串或者列表
+            for key, val in attributes.items():
+                if isinstance(val, str):
+                    self.image_attribute_dict[key] = [val]
+                elif isinstance(val, list):
+                    self.image_attribute_dict[key] = val
 
     def save_image_attribute(self):
         """
@@ -319,10 +396,25 @@ class AnnotationTool(QMainWindow):
             self.handle_excel_file(file_path)
 
         if hasattr(self, 'btn_import'):
-            pass # debug code
+            pass  # debug code
             # self.btn_import.deleteLater()
 
-        self.set_attribute_group_box()
+        # 重新加载属性UI
+        self.reload_attribute_ui()
+        
+    def reload_attribute_ui(self):
+        """
+        重新加载属性UI
+        """
+        # 清除当前dock_layout中除了编辑按钮之外的所有控件
+        if self.dock_layout.count() > 1:  # 第0个是编辑按钮布局
+            for i in range(self.dock_layout.count()-1, 0, -1):
+                item = self.dock_layout.itemAt(i)
+                if item.widget():
+                    item.widget().deleteLater()
+                    
+        # 重新添加属性组框
+        self.add_attribute_group_box()
 
     def handle_json_file(self, file_path):
         """
@@ -335,7 +427,8 @@ class AnnotationTool(QMainWindow):
         config_path.parent.mkdir(parents=True, exist_ok=True)  # 确保配置目录存在
 
         try:
-            shutil.copy2(file_path, config_path)  # 复制源文件到目标路径，保留元数据，如果目标文件存在会被覆盖
+            # 复制源文件到目标路径，保留元数据，如果目标文件存在会被覆盖
+            shutil.copy2(file_path, config_path)
         except Exception as e:
             AttributeConfigHelper.save_config(self.attributes)
 
@@ -365,6 +458,7 @@ class AnnotationTool(QMainWindow):
 
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     window = AnnotationTool()
     window.resize(1000, 800)
