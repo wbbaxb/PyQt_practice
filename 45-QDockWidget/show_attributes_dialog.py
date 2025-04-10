@@ -94,6 +94,9 @@ class ShowAttributesDialog(QDialog):
             0, lambda: self.attributes_changed.emit(self.attributes))
 
     def update_root_name(self):
+        """
+        更新根节点名称
+        """
         new_root_name = self.root_name_intput.text()
         old_root_name = next(iter(self.attributes.keys()))  # 始终从字典中获取根节点名称
 
@@ -105,8 +108,7 @@ class ShowAttributesDialog(QDialog):
             # 添加新键，值保持不变
             self.attributes[new_root_name] = root_attributes
 
-            AttributeConfigHelper.save_config(self.attributes)  # 保存配置
-            self.emit_attributes_changed()
+            self.save_attributes()
 
             QMessageBox.information(self, "提示", f"根节点名称已更新为: {new_root_name}")
 
@@ -175,7 +177,7 @@ class ShowAttributesDialog(QDialog):
         """
 
         for i, value in enumerate(attr_values, 1):
-            bg_color = "#ffffff" if i % 2 == 0 else "#f8f8f8"
+            bg_color = "#ffffff" if i % 2 == 0 else "#f8f8f8" # 如果i是偶数，则背景色为白色，否则为灰色
             item_str += f"""
             <div style='background-color: {bg_color}; padding: 5px 8px; margin: 3px 0; border-radius: 4px;'>
                 <span style='color: #2196F3; font-weight: bold;'>{i}.</span> {value}
@@ -206,8 +208,7 @@ class ShowAttributesDialog(QDialog):
 
             if attr_name in self.attributes[root_name]:
                 del self.attributes[root_name][attr_name]
-                AttributeConfigHelper.save_config(self.attributes)
-                self.emit_attributes_changed()
+                self.save_attributes()
 
             self.btn_add.setFocus()
 
@@ -221,10 +222,9 @@ class ShowAttributesDialog(QDialog):
 
         result = QFileDialog.getOpenFileName(
             self,
-            "选择Json或者Excel文件",
+            "选择属性文件",
             "./",
-            "Json文件(*.json);;Excel文件(*.xlsx *.xls)",
-            "Json文件(*.json)"
+            "属性文件(*.xlsx *.xls *.json)",
         )
 
         if not isinstance(result, tuple):
@@ -251,7 +251,7 @@ class ShowAttributesDialog(QDialog):
             self.attributes = json.load(f)
 
         config_path = AttributeConfigHelper.get_config_path()
-        config_path.parent.mkdir(parents=True, exist_ok=True)  # 确保配置目录存在
+        config_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             # 复制源文件到目标路径，保留元数据，如果目标文件存在会被覆盖
@@ -259,13 +259,19 @@ class ShowAttributesDialog(QDialog):
         except Exception as e:
             AttributeConfigHelper.save_config(self.attributes)
 
+        self.emit_attributes_changed()
         self.show_attributes()
+        self.update_root_name()
 
     def handle_excel_file(self, file_path):
         """
         处理Excel文件
         """
-        print(f"处理Excel文件: {file_path}")
+        data = ExcelHelper.read_excel(file_path)
+        self.attributes = data
+        self.save_attributes()
+        self.show_attributes()
+        self.update_root_name()
 
     def show_add_attribute_dialog(self):
         dialog = AttributeEditDialog(
@@ -285,9 +291,7 @@ class ShowAttributesDialog(QDialog):
             root_name = next(iter(self.attributes.keys()))
             self.attributes[root_name][attribute_data[0]] = attribute_data[1]
 
-            # 保存配置并发送信号
-            AttributeConfigHelper.save_config(self.attributes)
-            self.emit_attributes_changed()
+            self.save_attributes()
 
     def show_edit_attribute_dialog(self):
         sender = self.sender()
@@ -317,10 +321,15 @@ class ShowAttributesDialog(QDialog):
                 # 更新属性值
                 self.attributes[root_name][new_attr_name] = new_attr_values
 
-                # 保存配置并发送信号
-                AttributeConfigHelper.save_config(self.attributes)
-                self.emit_attributes_changed()
+                self.save_attributes()
 
                 self.set_tooltip(container, new_attr_name, new_attr_values)
         else:
             QMessageBox.warning(self, "警告", f"找不到属性: {attr_name}")
+
+    def save_attributes(self):
+        """
+        保存属性到appdata目录下并发送信号
+        """
+        AttributeConfigHelper.save_config(self.attributes)
+        self.emit_attributes_changed()

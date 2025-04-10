@@ -4,12 +4,8 @@ from pathlib import Path
 
 
 class ExcelHelper:
-    def __init__(self):
-        self.dir_path = Path(__file__).parent
-        self.xlsx_path = self.dir_path / "xlsx_for_read.xlsx"
-        self.xls_path = self.dir_path / "xls_for_read.xls"
-
-    def read_excel(self, path: str):
+    @staticmethod
+    def read_excel(path: str):
         excel_path = Path(path)
 
         if not excel_path.exists():
@@ -19,18 +15,14 @@ class ExcelHelper:
         # pandas会自动检测文件格式（.xlsx或.xls）
         df = pd.read_excel(excel_path)
 
-        if not self.check_excel_data(df):
+        if not ExcelHelper.check_excel_data(df):
             print("Excel数据不符合要求")
             return
 
-        organized_data = self.organize_data(df)
+        return ExcelHelper.organize_data(df)
 
-        if organized_data:
-            file_name = excel_path.stem  # 获取文件名（不包含扩展名）
-            self.save_json_file(
-                organized_data, self.dir_path / f"{file_name}.json")
-
-    def check_excel_data(self, df: pd.DataFrame) -> bool:
+    @staticmethod
+    def check_excel_data(df: pd.DataFrame) -> bool:
         """
         检查Excel数据是否符合要求
 
@@ -62,7 +54,8 @@ class ExcelHelper:
 
         return True
 
-    def organize_data(self, df):
+    @staticmethod
+    def organize_data(df) -> dict:
         """
         将DataFrame数据组织成嵌套的字典结构
         """
@@ -89,18 +82,19 @@ class ExcelHelper:
 
         return organized_data
 
-    def save_json_file(self, dict_data: dict, output_path: str):
-        with open(output_path, "w", encoding="utf-8") as f:
-            json.dump(dict_data, f, ensure_ascii=False, indent=2)
+    # @staticmethod
+    # def save_json_file(dict_data: dict, output_path: str):
+    #     with open(output_path, "w", encoding="utf-8") as f:
+    #         json.dump(dict_data, f, ensure_ascii=False, indent=2)
 
-    def json_to_excel(self, mode: int):
+    @staticmethod
+    def json_to_excel(json_path: str, output_path: str, mode: int):
         """
         将JSON数据转换为Excel文件
         mode: 0 表示xlsx格式, 1 表示xls格式
         """
-        json_path = self.dir_path / "attribute.json"
-        output_path = self.dir_path / \
-            "attribute.xlsx" if mode == 0 else self.dir_path / "attribute.xls"
+        output_path = output_path / \
+            "attribute.xlsx" if mode == 0 else output_path / "attribute.xls"
 
         # 读取JSON文件
         if not json_path.exists():
@@ -125,16 +119,4 @@ class ExcelHelper:
                     # 添加新行到DataFrame
                     df = pd.concat([df, new_row], ignore_index=True)
 
-        # 对于新版pandas（1.5.0及以上），使用openpyxl引擎保存两种格式
         df.to_excel(output_path, index=False, engine='openpyxl')
-        print(f"Excel文件已保存至: {output_path}")
-
-    def main(self):
-        # self.read_excel(self.xlsx_path)
-        # self.read_excel(self.xls_path)
-        self.json_to_excel(0)
-        self.json_to_excel(1)
-
-
-if __name__ == "__main__":
-    ExcelTest().main()
