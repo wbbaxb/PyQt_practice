@@ -1,0 +1,41 @@
+/* 通用按钮样式 */
+QPushButton {
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #2196F3;
+    color: white;
+}
+
+QPushButton:hover {
+    background-color: rgb(73, 170, 159);
+}
+
+QPushButton:pressed {
+    background-color: rgb(234, 208, 112);
+}
+
+/* 通用标签样式 */
+QLabel {
+    color: black;
+}
+
+/* 通用输入框样式 */
+QLineEdit {
+    border: 1px solid #2196F3;
+    border-radius: 5px;
+    padding: 4px;
+}
+
+/* 通用分组框样式 */
+QGroupBox {
+    border: 1px solid lightblue;
+    border-radius: 3px;
+    margin-top: 15px;
+    padding: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+} 

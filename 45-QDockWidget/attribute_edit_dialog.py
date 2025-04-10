@@ -4,6 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from customitem_widget import CustomItemWidget
 from Common.utils import WindowUtils
+from Common.StyleManager import StyleManager
 
 
 class AttributeEditDialog(QDialog):
@@ -19,88 +20,17 @@ class AttributeEditDialog(QDialog):
         self.mode = mode
         self.attribute_item = attribute_item
         self.setObjectName("editAttributeDialog")
-        self.font_size = 14
         self.resize(400, 500)
         self.setup_ui()
         self.init_attribute_item()
         self.setup_style()
 
     def setup_style(self):
-        self.setStyleSheet(f"""
-            #editAttributeDialog, #nameGroup, #valuesGroup, #nameInput, #valueInput, #valuesList {{
-                background-color: white;
-            }}
-            
-            /* 通用按钮样式 */
-            #addValueBtn, #confirmBtn, #cancelBtn {{
-                border-radius: 5px; 
-                background-color: #2196F3; /* 蓝色 */
-                padding: 10px 20px; /* 上下10px 左右20px */
-                font-size: {self.font_size}px;
-                font-weight: normal;
-            }}
-
-            #addValueBtn {{
-                height: 30px;
-                padding: 0px 10px;
-            }}
-            
-            /* 红色按钮样式 */
-            #cancelBtn {{
-                background-color: #f44336; /* 红色 */
-                font-weight: normal;
-            }}
-            /* 按钮状态 */
-            #addValueBtn:disabled, #confirmBtn:disabled {{
-                background-color: gray;
-                color: white;
-            }}
-            #addValueBtn:hover, #confirmBtn:hover {{
-                background-color: rgb(73, 170, 159);
-            }}
-            #addValueBtn:pressed, #confirmBtn:pressed {{
-                background-color: rgb(234, 208, 112);
-            }}
-            #cancelBtn:hover {{
-                background-color: rgb(198, 122, 211);
-            }}
-            #cancelBtn:pressed {{
-                background-color: rgb(206, 200, 229);
-            }}
-            
-            /* 其他控件样式 */
-            #nameTitle, #valuesTitle {{
-                min-width:70px;
-                font-size: {self.font_size}px;
-                color: black;
-                font-weight: normal;
-                border: none;
-            }}
-            #nameLabel {{
-                font-size: 16px;
-                color: black;
-                font-weight: normal;
-                border: none;
-            }}
-            #nameInput, #valueInput {{
-                font-size: {self.font_size}px;
-                border: 1px solid #2196F3; /* 蓝色 */
-                border-radius: 5px;
-                padding: 4px;
-            }}
-            #valuesList {{
-                border: 2px solid #cccccc;
-                border-radius: 8px;
-                height: 150px;
-            }}
-            #valuesList::item {{
-                height: 20px;
-                padding: 0px 20px  /* 左右20px */
-            }}
-            #nameGroup, #valuesGroup {{
-                border-radius: 5px;
-            }}
-        """)
+        # 使用组合样式方法
+        self.setStyleSheet(StyleManager.get_combined_style(
+            'common',
+            'attribute_edit_dialog'
+        ))
 
     def setup_ui(self):
         self.setWindowTitle("添加属性" if self.mode == 0 else "编辑属性")

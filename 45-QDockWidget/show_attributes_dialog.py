@@ -5,6 +5,7 @@ from Common.UniformGridLayout import UniformGridLayout
 from attribute_edit_dialog import AttributeEditDialog
 from Common.custom_message_box import CustomMessageBox
 from Common.attribute_config_helper import AttributeConfigHelper
+from Common.StyleManager import StyleManager
 from Common.excel_helper import ExcelHelper
 from pathlib import Path
 import json
@@ -17,72 +18,15 @@ class ShowAttributesDialog(QDialog):
     def __init__(self, attributes: dict, parent=None):
         super().__init__(parent=parent)
         self.attributes = attributes
-        self.font_size = 16
         self.setup_style()
         self.setup_ui()
 
     def setup_style(self):
-        self.setStyleSheet(f"""
-            QWidget#attributeContainer {{
-                border: 2px solid orange;
-                border-radius: 10px;
-                background-color: white;
-            }}
-            
-            QLabel {{
-                font-size: {self.font_size}px;
-                font-weight: normal;
-                color: black;
-            }}
-            
-            QPushButton {{
-                border-radius: 5px;
-                padding: 10px 20px;
-                font-size: {self.font_size}px;
-                font-weight: normal;
-                background-color: #2196F3; /* 蓝色 */
-            }}
-            QPushButton:hover {{
-                background-color: rgb(73, 170, 159);
-            }}
-            QPushButton:pressed {{
-                background-color: rgb(234, 208, 112);
-            }}
-
-            QPushButton#importBtn {{
-                background-color: yellowgreen;
-            }}
-            QPushButton#importBtn:hover {{
-                background-color: rgb(198, 122, 211); /* 紫色 */
-            }}
-            QPushButton#importBtn:pressed {{
-                background-color: rgb(206, 200, 229);  /* 淡紫色 */
-            }}
-                        
-            QPushButton#deleteBtn {{
-                background-color: #f44336; /* 红色 */
-            }}
-            QPushButton#deleteBtn:hover {{
-                background-color: rgb(198, 122, 211);
-            }}
-            QPushButton#deleteBtn:pressed {{
-                background-color: rgb(206, 200, 229);
-            }}
-            QLabel#rootNameLabel {{
-                font-size: {self.font_size}px;
-                font-weight: normal;
-                color: black;
-            }}
-            QPushButton#saveBtn:disabled {{
-                background-color: #f0f0f0; /* 灰色 */
-            }}
-            QLineEdit#rootNameInput {{
-                border: 1px solid #2196F3; /* 蓝色 */
-                border-radius: 5px;
-                height: 35px;
-                font-size: {self.font_size}px;
-            }}
-        """)
+        # 使用组合样式方法
+        self.setStyleSheet(StyleManager.get_combined_style(
+            'common',
+            'show_attributes_dialog'
+        ))
 
     def setup_ui(self):
         self.setWindowTitle("属性编辑")

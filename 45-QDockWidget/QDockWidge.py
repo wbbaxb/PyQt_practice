@@ -8,6 +8,7 @@ from Common.flowLayout import FlowLayout
 from show_attributes_dialog import ShowAttributesDialog
 from Common.utils import WindowUtils
 from Common.attribute_config_helper import AttributeConfigHelper
+from Common.StyleManager import StyleManager
 import shutil
 import copy
 
@@ -20,115 +21,16 @@ class AnnotationTool(QMainWindow):
         self.image_attribute_dict = {}
         self.image_attribute_path = Path(__file__).parent / "舌图.json"
         self.load_image_attribute()
-        self.font_size = 16
         self.setup_style()
         self.setup_ui()
 
     def setup_style(self):
-        self.setStyleSheet(f"""
-            QCheckBox {{
-                font-size: {self.font_size}px;
-                color: black;
-            }}
-            QPushButton#edit_btn, QPushButton#toggle_dock_btn {{
-                color: white;
-                border-radius: 10px;
-            }}
-
-            QPushButton#edit_btn {{
-                background-color: green;
-                height: 30px;
-            }}
-            QPushButton#toggle_dock_btn {{
-                background-color: orange;
-                height: 50px;
-            }}
-
-            QPushButton#edit_btn:hover, QPushButton#toggle_dock_btn:hover {{
-                background-color: rgb(73, 170, 159);
-            }}
-            QPushButton#edit_btn:pressed, QPushButton#toggle_dock_btn:pressed {{
-                background-color: rgb(234, 208, 112);
-            }}
-
-            QGroupBox {{
-                font-size: {self.font_size}px;
-                border: 1px solid lightblue;
-                border-radius: 3px;
-                margin-top: 20px;
-                padding: 20px 10px;  /* 增加垂直和水平内边距 */
-            }}
-            QGroupBox::title {{
-                left: 0;
-                padding: 0;
-                background-color: lightblue;
-                border-radius: 2px;
-                font-size: {self.font_size}px;
-            }}
-            QWidget#main_container {{
-                background-color: lightblue;
-            }}
-            QScrollArea#scroll_area {{
-                border: 0px;
-            }}
-            QGroupBox#root_group_box {{
-                padding: 10px 0px; 
-                border: 1px solid red;
-            }}
-            QGroupBox#root_group_box::title {{
-                background-color: red;
-            }}
-            
-            /* 滚动条样式 */
-            QScrollBar:vertical {{
-                background: #F0F0F0;
-                width: 12px;
-                margin: 0px 0px 0px 0px;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:vertical {{
-                background: #C0C0C0;
-                min-height: 30px;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:vertical:hover {{
-                background: #A0A0A0;
-            }}
-            QScrollBar::handle:vertical:pressed {{
-                background: #808080;
-            }}
-            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-                height: 0px;
-            }}
-            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {{
-                background: none;
-            }}
-            
-            /* 水平滚动条样式 */
-            QScrollBar:horizontal {{
-                background: #F0F0F0;
-                height: 12px;
-                margin: 0px 0px 0px 0px;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:horizontal {{
-                background: #C0C0C0;
-                min-width: 30px;
-                border-radius: 6px;
-            }}
-            QScrollBar::handle:horizontal:hover {{
-                background: #A0A0A0;
-            }}
-            QScrollBar::handle:horizontal:pressed {{
-                background: #808080;
-            }}
-            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
-                width: 0px;
-            }}
-            QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
-                background: none;
-            }}
-        """)
+        # 使用组合样式方法，包含通用样式、滚动条样式和注释工具样式
+        self.setStyleSheet(StyleManager.get_combined_style(
+            'common', 
+            'scrollbar', 
+            'annotation_tool'
+        ))
 
     def setup_ui(self):
         """
