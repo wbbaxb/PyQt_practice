@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QWidget, QListWidgetItem,
-                             QLabel, QLineEdit, QListWidget, QFrame, QMessageBox, QApplication)
+from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QListWidgetItem,
+                             QLabel, QLineEdit, QListWidget, QFrame, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
 from customitem_widget import CustomItemWidget
@@ -26,7 +26,6 @@ class AttributeEditDialog(QDialog):
         self.setup_style()
 
     def setup_style(self):
-        # 使用组合样式方法
         self.setStyleSheet(StyleManager.get_combined_style(
             'common',
             'attribute_edit_dialog'
@@ -204,3 +203,12 @@ class AttributeEditDialog(QDialog):
 
     def cancel(self):
         self.reject()
+
+if __name__ == "__main__":
+    import sys
+    from PyQt5.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+    dialog = AttributeEditDialog()
+    dialog.show()
+    sys.exit(app.exec_())

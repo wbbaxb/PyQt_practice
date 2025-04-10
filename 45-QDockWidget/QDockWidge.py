@@ -25,7 +25,6 @@ class AnnotationTool(QMainWindow):
         self.setup_ui()
 
     def setup_style(self):
-        # 使用组合样式方法，包含通用样式、滚动条样式和注释工具样式
         self.setStyleSheet(StyleManager.get_combined_style(
             'common', 
             'scrollbar', 
@@ -33,19 +32,12 @@ class AnnotationTool(QMainWindow):
         ))
 
     def setup_ui(self):
-        """
-        初始化UI
-        """
-        # 设置主布局
         self.set_main_layout()
-
-        # 设置停靠窗口
         self.set_dock_widget()
 
         # 添加编辑按钮组
         self.add_edit_group_box()
 
-        # 如果有属性数据，添加属性组框
         if self.attributes:
             self.set_attribute_group_box()
 

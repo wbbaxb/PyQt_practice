@@ -48,11 +48,3 @@ class AttributeConfigHelper():
         with open(config_path, 'w', encoding="utf-8") as f:
             # ensure_ascii=False 防止中文乱码, indent=2 缩进2个空格
             json.dump(data, f, ensure_ascii=False, indent=2)
-
-    @staticmethod
-    def load_config():
-        config_path = AttributeConfigHelper.get_config_path()
-        if config_path.exists():
-            with open(config_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        return None

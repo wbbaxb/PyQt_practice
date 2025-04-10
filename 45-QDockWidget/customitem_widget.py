@@ -5,14 +5,14 @@ from PyQt5.QtCore import Qt, QSize
 class CustomItemWidget(QWidget):
     def __init__(self, text, parent=None):
         super().__init__(parent)
-        self.font_size = 16
+        self.font_size = 14
         self.main_layout = QVBoxLayout()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setAlignment(Qt.AlignVCenter)
         self.setLayout(self.main_layout)
 
         self.frame = QFrame()
-        self.frame.setMinimumSize(QSize(100, 40))
+        self.frame.setMinimumSize(QSize(100, 30))
         self.main_layout.addWidget(self.frame)
 
         self.h_layout = QHBoxLayout()
@@ -25,7 +25,7 @@ class CustomItemWidget(QWidget):
         self.label.setObjectName("CustomItemLabel")
 
         self.button = QPushButton("删除")
-        self.button.setMinimumHeight(25)
+        self.button.setMinimumHeight(20)
         self.button.setObjectName("CustomItemButton")
         self.button.setCursor(Qt.PointingHandCursor)
 
@@ -51,6 +51,8 @@ class CustomItemWidget(QWidget):
                 border-radius: 4px;
                 font-size: {int(self.font_size)}px;
                 font-weight: normal;
+                font-size: {int(self.font_size)}px;
+                padding: 2px 0;
             }}
             #CustomItemButton:hover {{
                 background-color: rgb(198, 122, 211);

@@ -22,7 +22,6 @@ class ShowAttributesDialog(QDialog):
         self.setup_ui()
 
     def setup_style(self):
-        # 使用组合样式方法
         self.setStyleSheet(StyleManager.get_combined_style(
             'common',
             'show_attributes_dialog'
@@ -82,8 +81,14 @@ class ShowAttributesDialog(QDialog):
         btn_import_attribute.setCursor(Qt.PointingHandCursor)
         btn_import_attribute.clicked.connect(self.import_attribute)
 
+        btn_export_attribute = QPushButton("导出")
+        btn_export_attribute.setObjectName("exportBtn")
+        btn_export_attribute.setCursor(Qt.PointingHandCursor)
+        btn_export_attribute.clicked.connect(self.export_attribute)
+
         self.top_layout.addWidget(btn_show_add_attribute_dialog, 1)
         self.top_layout.addWidget(btn_import_attribute, 1)
+        self.top_layout.addWidget(btn_export_attribute, 1)
 
         self.show_attributes()
         btn_show_add_attribute_dialog.setFocus()
@@ -177,7 +182,7 @@ class ShowAttributesDialog(QDialog):
         """
 
         for i, value in enumerate(attr_values, 1):
-            bg_color = "#ffffff" if i % 2 == 0 else "#f8f8f8" # 如果i是偶数，则背景色为白色，否则为灰色
+            bg_color = "#ffffff" if i % 2 == 0 else "#f8f8f8"  # 如果i是偶数，则背景色为白色，否则为灰色
             item_str += f"""
             <div style='background-color: {bg_color}; padding: 5px 8px; margin: 3px 0; border-radius: 4px;'>
                 <span style='color: #2196F3; font-weight: bold;'>{i}.</span> {value}
@@ -214,6 +219,56 @@ class ShowAttributesDialog(QDialog):
 
             if attr_name in self.attributes[root_name]:
                 QMessageBox.critical(self, "提示", f"属性: {attr_name} 删除失败")
+
+    def export_attribute(self):
+        """
+        导出属性
+        """
+        file_dialog = QFileDialog(self)
+        file_dialog.setWindowTitle("导出属性")
+        file_dialog.setAcceptMode(QFileDialog.AcceptSave)  # 设置为保存模式
+        file_dialog.setFileMode(QFileDialog.AnyFile)  # 设置为可以保存任何文件
+
+        root_name = next(iter(self.attributes.keys()))
+        default_filename = f"{root_name}_属性配置"
+        file_dialog.selectFile(default_filename)  # 设置默认文件名为根节点名称
+
+        # 设置文件类型过滤器
+        file_dialog.setNameFilter("Excel文件 (*.xlsx);;JSON文件 (*.json)")
+
+        temp = file_dialog.exec_()
+        print(temp)
+
+        if temp:  # 选择文件返回1，取消返回0
+            file_paths = file_dialog.selectedFiles()
+
+            if not file_paths:
+                return
+
+            file_path = file_paths[0]
+            selected_filter = file_dialog.selectedNameFilter()
+
+            path = Path(file_path)
+
+            # 根据选择的文件类型设置正确的扩展名
+            if selected_filter == "Excel文件 (*.xlsx)" and not path.suffix == ".xlsx":
+                path = path.with_suffix(".xlsx")  # 添加.xlsx后缀
+            elif selected_filter == "JSON文件 (*.json)" and not path.suffix == ".json":
+                path = path.with_suffix(".json")  # 添加.json后缀
+
+            try:
+                if path.suffix.endswith(".xlsx"):
+                    ExcelHelper.dict_to_excel(self.attributes, path)
+                elif path.suffix.endswith(".json"):
+                    with open(path, 'w', encoding="utf-8") as f:
+                        # ensure_ascii=False 防止中文乱码, indent=2 缩进2个空格
+                        json.dump(self.attributes, f,
+                                  ensure_ascii=False, indent=2)  # 保存为json文件
+
+                QMessageBox.information(
+                    self, "导出成功", f"属性已成功导出到:\n{file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "导出失败", f"导出过程中发生错误:\n{str(e)}")
 
     def import_attribute(self):
         """
@@ -261,7 +316,11 @@ class ShowAttributesDialog(QDialog):
 
         self.emit_attributes_changed()
         self.show_attributes()
-        self.update_root_name()
+        
+        new_root_name = next(iter(self.attributes.keys()))
+        self.root_name_intput.setText(new_root_name)
+
+        QMessageBox.information(self, "提示", '导入成功')
 
     def handle_excel_file(self, file_path):
         """
@@ -271,7 +330,11 @@ class ShowAttributesDialog(QDialog):
         self.attributes = data
         self.save_attributes()
         self.show_attributes()
-        self.update_root_name()
+
+        new_root_name = next(iter(self.attributes.keys()))
+        self.root_name_intput.setText(new_root_name)
+
+        QMessageBox.information(self, "提示", '导入成功')
 
     def show_add_attribute_dialog(self):
         dialog = AttributeEditDialog(

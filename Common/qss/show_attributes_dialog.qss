@@ -25,10 +25,13 @@ QPushButton:pressed {
 QPushButton#importBtn {
     background-color: yellowgreen;
 }
-QPushButton#importBtn:hover {
+QPushButton#exportBtn {
+    background-color: rgb(151, 37, 185);
+}
+QPushButton#importBtn:hover,#exportBtn:hover {
     background-color: rgb(198, 122, 211); /* 紫色 */
 }
-QPushButton#importBtn:pressed {
+QPushButton#importBtn:pressed,#exportBtn:pressed {
     background-color: rgb(206, 200, 229);  /* 淡紫色 */
 }
                 
@@ -51,5 +54,5 @@ QPushButton#saveBtn:disabled {
 QLineEdit#rootNameInput {
     border: 1px solid #2196F3; /* 蓝色 */
     border-radius: 5px;
-    height: 35px;
+    height: 26px;
 } 

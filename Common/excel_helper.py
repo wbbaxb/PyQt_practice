@@ -5,7 +5,7 @@ from pathlib import Path
 
 class ExcelHelper:
     @staticmethod
-    def read_excel(path: str):
+    def read_excel(path: str) -> dict:
         excel_path = Path(path)
 
         if not excel_path.exists():
@@ -82,10 +82,24 @@ class ExcelHelper:
 
         return organized_data
 
-    # @staticmethod
-    # def save_json_file(dict_data: dict, output_path: str):
-    #     with open(output_path, "w", encoding="utf-8") as f:
-    #         json.dump(dict_data, f, ensure_ascii=False, indent=2)
+    @staticmethod
+    def dict_to_excel(dict_data: dict, output_path: str):
+        # 转换数据为DataFrame
+        df = pd.DataFrame()
+
+        # 遍历JSON数据
+        for category, attributes in dict_data.items():
+            # 遍历属性
+            for attr_name, values in attributes.items():
+                # 遍历属性值
+                for value in values:
+                    # 创建新行
+                    new_row = pd.DataFrame(
+                        [{'Category': category, 'Attribute': attr_name, 'Value': value}])
+                    # 添加新行到DataFrame
+                    df = pd.concat([df, new_row], ignore_index=True)
+
+        df.to_excel(output_path, index=False, engine='openpyxl')
 
     @staticmethod
     def json_to_excel(json_path: str, output_path: str, mode: int):
@@ -103,20 +117,4 @@ class ExcelHelper:
 
         with open(json_path, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
-
-        # 转换数据为DataFrame
-        df = pd.DataFrame()
-
-        # 遍历JSON数据
-        for category, attributes in json_data.items():
-            # 遍历属性
-            for attr_name, values in attributes.items():
-                # 遍历属性值
-                for value in values:
-                    # 创建新行
-                    new_row = pd.DataFrame(
-                        [{'Category': category, 'Attribute': attr_name, 'Value': value}])
-                    # 添加新行到DataFrame
-                    df = pd.concat([df, new_row], ignore_index=True)
-
-        df.to_excel(output_path, index=False, engine='openpyxl')
+            ExcelHelper.dict_to_excel(json_data, output_path)

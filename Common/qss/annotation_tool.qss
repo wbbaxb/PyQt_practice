@@ -30,7 +30,7 @@ QGroupBox {
 }
 QGroupBox::title {
     left: 0;
-    padding: 0;
+    padding: 2px;
     background-color: lightblue;
     border-radius: 2px;
 }
