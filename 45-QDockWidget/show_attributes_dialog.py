@@ -5,11 +5,12 @@ from Common.UniformGridLayout import UniformGridLayout
 from attribute_edit_dialog import AttributeEditDialog
 from Common.custom_message_box import CustomMessageBox
 from Common.attribute_config_helper import AttributeConfigHelper
-from Common.StyleManager import StyleManager
+from Common.style_util import load_style
 from Common.excel_helper import ExcelHelper
 from pathlib import Path
 import json
 import shutil
+import copy
 
 
 class ShowAttributesDialog(QDialog):
@@ -22,13 +23,10 @@ class ShowAttributesDialog(QDialog):
         self.setup_ui()
 
     def setup_style(self):
-        self.setStyleSheet(StyleManager.get_combined_style(
-            'common',
-            'show_attributes_dialog'
-        ))
+        self.setStyleSheet(load_style())
 
     def setup_ui(self):
-        self.setWindowTitle("属性编辑")
+        self.setWindowTitle("属性设置")
         self.setWindowIcon(QIcon("./Icons/python_96px.ico"))
         self.resize(800, 600)
         self.setWindowFlags(Qt.Window | Qt.WindowTitleHint |
@@ -175,7 +173,7 @@ class ShowAttributesDialog(QDialog):
     def set_tooltip(self, container: QWidget, attr_name: str, attr_values: list[str]):
         item_str = f"""
             <div style='background-color: #f0f0f0; padding: 12px; border-radius: 6px; border-left: 4px solid #2196F3;'>
-                <div style='color: #2196F3; font-weight: bold; font-size: 16px; margin-bottom: 8px; 
+                <div style='color: #2196F3; font-weight: bold; font-size: 16px; margin-bottom: 8px;
                     border-bottom: 1px solid #ddd; padding-bottom: 5px;'>{attr_name}
                 </div>
             <div style='max-height: 200px; overflow-y: auto;'>
@@ -236,10 +234,7 @@ class ShowAttributesDialog(QDialog):
         # 设置文件类型过滤器
         file_dialog.setNameFilter("Excel文件 (*.xlsx);;JSON文件 (*.json)")
 
-        temp = file_dialog.exec_()
-        print(temp)
-
-        if temp:  # 选择文件返回1，取消返回0
+        if file_dialog.exec_():  # 选择文件返回1，取消返回0
             file_paths = file_dialog.selectedFiles()
 
             if not file_paths:
@@ -277,9 +272,9 @@ class ShowAttributesDialog(QDialog):
 
         result = QFileDialog.getOpenFileName(
             self,
-            "选择属性文件",
-            "./",
-            "属性文件(*.xlsx *.xls *.json)",
+            "选择一个Excel或者JSON文件",
+            "./",  # 设置默认路径
+            "属性文件(*.xlsx *.json)",
         )
 
         if not isinstance(result, tuple):
@@ -290,15 +285,26 @@ class ShowAttributesDialog(QDialog):
         if not file_path:
             return
 
+        res = False
         if Path(file_path).suffix == ".json":
-            self.handle_json_file(file_path)
+            res = self.handle_json_file(file_path)
         elif Path(file_path).suffix in [".xlsx", ".xls"]:
-            self.handle_excel_file(file_path)
+            res = self.handle_excel_file(file_path)
         else:
             print(f"不支持的文件类型: {file_path}")
             return
 
-    def handle_json_file(self, file_path):
+        if res:
+            self.show_attributes()
+
+            new_root_name = next(iter(self.attributes.keys()))
+            self.root_name_intput.setText(new_root_name)
+
+            QMessageBox.information(self, "提示", '导入成功')
+        else:
+            QMessageBox.critical(self, "提示", '导入失败')
+
+    def handle_json_file(self, file_path) -> bool:
         """
         处理JSON文件
         """
@@ -315,30 +321,22 @@ class ShowAttributesDialog(QDialog):
             AttributeConfigHelper.save_config(self.attributes)
 
         self.emit_attributes_changed()
-        self.show_attributes()
-        
-        new_root_name = next(iter(self.attributes.keys()))
-        self.root_name_intput.setText(new_root_name)
 
-        QMessageBox.information(self, "提示", '导入成功')
+        return True
 
-    def handle_excel_file(self, file_path):
+    def handle_excel_file(self, file_path) -> bool:
         """
         处理Excel文件
         """
         data = ExcelHelper.read_excel(file_path)
         self.attributes = data
         self.save_attributes()
-        self.show_attributes()
 
-        new_root_name = next(iter(self.attributes.keys()))
-        self.root_name_intput.setText(new_root_name)
-
-        QMessageBox.information(self, "提示", '导入成功')
+        return True
 
     def show_add_attribute_dialog(self):
         dialog = AttributeEditDialog(
-            parent=self, mode=0, exits_attributes=self.attributes.keys())
+            parent=self, mode=0, attributes=copy.deepcopy(self.attributes))
         # dialog.setWindowModality(Qt.ApplicationModal)
         # dialog.show() # 即使设置了setWindowModality(Qt.ApplicationModal)，
         # 使用show()或者open()还是不会阻塞，所以如果需要获取返回值，需要使用exec_()
@@ -348,6 +346,7 @@ class ShowAttributesDialog(QDialog):
 
         if result == QDialog.Accepted:
             attribute_data = dialog.attribute_data
+
             self.add_attribute(attribute_data)
 
             # 将attribute_data添加到self.attributes中
@@ -368,7 +367,7 @@ class ShowAttributesDialog(QDialog):
             attribute_item = (attr_name, attr_values)
 
             dialog = AttributeEditDialog(
-                parent=self, mode=1, attribute_item=attribute_item)
+                parent=self, mode=1, attribute_item=copy.deepcopy(attribute_item))
 
             result = dialog.exec_()
 

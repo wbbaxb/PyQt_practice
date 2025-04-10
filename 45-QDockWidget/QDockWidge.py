@@ -8,7 +8,7 @@ from Common.flowLayout import FlowLayout
 from show_attributes_dialog import ShowAttributesDialog
 from Common.utils import WindowUtils
 from Common.attribute_config_helper import AttributeConfigHelper
-from Common.StyleManager import StyleManager
+from Common.style_util import load_style
 import shutil
 import copy
 
@@ -25,11 +25,7 @@ class AnnotationTool(QMainWindow):
         self.setup_ui()
 
     def setup_style(self):
-        self.setStyleSheet(StyleManager.get_combined_style(
-            'common', 
-            'scrollbar', 
-            'annotation_tool'
-        ))
+        self.setStyleSheet(load_style())
 
     def setup_ui(self):
         self.set_main_layout()

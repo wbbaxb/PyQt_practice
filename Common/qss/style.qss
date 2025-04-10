@@ -1,0 +1,259 @@
+/* ================ 通用样式 ================ */
+/* 通用按钮样式 */
+QPushButton {
+    border-radius: 5px;
+    padding: 5px 10px;
+    background-color: #2196F3;
+    color: white;
+    font-size: 16px;
+}
+
+QPushButton:hover {
+    background-color: rgb(73, 170, 159);
+}
+
+QPushButton:pressed {
+    background-color: rgb(234, 208, 112);
+}
+
+/* 通用标签样式 */
+QLabel {
+    color: black;
+    font-size: 16px;
+}
+
+/* 通用输入框样式 */
+QLineEdit {
+    border: 1px solid #2196F3;
+    border-radius: 5px;
+    padding: 4px;
+    font-size: 16px;
+}
+
+/* 通用分组框样式 */
+QGroupBox {
+    border: 1px solid lightblue;
+    border-radius: 3px;
+    margin-top: 15px;
+    padding: 10px;
+    font-size: 16px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 5px;
+    font-size: 16px;
+}
+
+QCheckBox {
+    color: black;
+    font-size: 16px;
+}
+
+/* ================ 滚动条样式 ================ */
+/* 垂直滚动条样式 */
+QScrollBar:vertical {
+    background: #F0F0F0;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical {
+    background: #C0C0C0;
+    min-height: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #A0A0A0;
+}
+QScrollBar::handle:vertical:pressed {
+    background: #808080;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+/* 水平滚动条样式 */
+QScrollBar:horizontal {
+    background: #F0F0F0;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal {
+    background: #C0C0C0;
+    min-width: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #A0A0A0;
+}
+QScrollBar::handle:horizontal:pressed {
+    background: #808080;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+/* ================ AnnotationTool样式 ================ */
+QPushButton#edit_btn, QPushButton#toggle_dock_btn {
+    color: white;
+    border-radius: 10px;
+}
+
+QPushButton#edit_btn {
+    background-color: green;
+    height: 30px;
+}
+QPushButton#toggle_dock_btn {
+    background-color: orange;
+    height: 50px;
+}
+
+QPushButton#edit_btn:hover, QPushButton#toggle_dock_btn:hover {
+    background-color: rgb(73, 170, 159);
+}
+QPushButton#edit_btn:pressed, QPushButton#toggle_dock_btn:pressed {
+    background-color: rgb(234, 208, 112);
+}
+
+QGroupBox {
+    border: 1px solid lightblue;
+    border-radius: 3px;
+    margin-top: 20px;
+    padding: 20px 10px;  /* 增加垂直和水平内边距 */
+}
+QGroupBox::title {
+    left: 0;
+    padding: 0;
+    background-color: lightblue;
+    border-radius: 2px;
+}
+QWidget#main_container {
+    background-color: lightblue;
+}
+QScrollArea#scroll_area {
+    border: 0px;
+}
+QGroupBox#root_group_box {
+    padding: 10px 0px; 
+    border: 1px solid red;
+}
+QGroupBox#root_group_box::title {
+    background-color: red;
+}
+
+/* ================ ShowAttributesDialog样式 ================ */
+QWidget#attributeContainer {
+    border: 2px solid orange;
+    border-radius: 10px;
+    background-color: white;
+}
+
+QPushButton#importBtn {
+    background-color: yellowgreen;
+}
+QPushButton#importBtn:hover {
+    background-color: rgb(198, 122, 211); /* 紫色 */
+}
+QPushButton#importBtn:pressed {
+    background-color: rgb(206, 200, 229);  /* 淡紫色 */
+}
+
+QPushButton#exportBtn {
+    background-color: #03A9F4; /* 蓝色 */
+}
+QPushButton#exportBtn:hover {
+    background-color: #039BE5;
+}
+QPushButton#exportBtn:pressed {
+    background-color: #0288D1;
+}
+                
+QPushButton#deleteBtn {
+    background-color: #f44336; /* 红色 */
+}
+QPushButton#deleteBtn:hover {
+    background-color: rgb(198, 122, 211);
+}
+QPushButton#deleteBtn:pressed {
+    background-color: rgb(206, 200, 229);
+}
+QLabel#rootNameLabel {
+    font-weight: normal;
+    color: black;
+}
+QPushButton#saveBtn:disabled {
+    background-color: #f0f0f0; /* 灰色 */
+}
+QLineEdit#rootNameInput {
+    border: 1px solid #2196F3; /* 蓝色 */
+    border-radius: 5px;
+    height: 35px;
+}
+
+/* ================ AttributeEditDialog样式 ================ */
+#editAttributeDialog, #nameGroup, #valuesGroup, #nameInput, #valueInput, #valuesList {
+    background-color: white;
+}
+
+/* 通用按钮样式 */
+#addValueBtn, #confirmBtn, #cancelBtn {
+    border-radius: 5px; 
+    background-color: #2196F3; /* 蓝色 */
+    padding: 10px 20px; /* 上下10px 左右20px */
+    font-weight: normal;
+}
+
+#addValueBtn {
+    height: 30px;
+    padding: 0px 10px;
+}
+
+/* 红色按钮样式 */
+#cancelBtn {
+    background-color: #f44336; /* 红色 */
+    font-weight: normal;
+}
+/* 按钮状态 */
+#addValueBtn:disabled, #confirmBtn:disabled {
+    background-color: gray;
+    color: white;
+}
+
+#nameTitle, #valuesTitle {
+    min-width:70px;
+    color: black;
+    font-weight: normal;
+    border: none;
+}
+#nameLabel {
+    font-size: 16px;
+    color: black;
+    font-weight: normal;
+    border: none;
+}
+#nameInput, #valueInput {
+    border: 1px solid #2196F3; /* 蓝色 */
+    border-radius: 5px;
+    padding: 4px;
+}
+#valuesList {
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    height: 150px;
+}
+#valuesList::item {
+    height: 20px;
+    padding: 0px 20px  /* 左右20px */
+}
+#nameGroup, #valuesGroup {
+    border-radius: 5px;
+} 
