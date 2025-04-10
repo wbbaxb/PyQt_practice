@@ -25,7 +25,7 @@ class CustomItemWidget(QWidget):
         self.label.setObjectName("CustomItemLabel")
 
         self.button = QPushButton("删除")
-        self.button.setMinimumHeight(20)
+        self.button.setFixedHeight(20)
         self.button.setObjectName("CustomItemButton")
         self.button.setCursor(Qt.PointingHandCursor)
 
@@ -52,7 +52,7 @@ class CustomItemWidget(QWidget):
                 font-size: {int(self.font_size)}px;
                 font-weight: normal;
                 font-size: {int(self.font_size)}px;
-                padding: 2px 0;
+                padding: 0;
             }}
             #CustomItemButton:hover {{
                 background-color: rgb(198, 122, 211);

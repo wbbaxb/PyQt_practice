@@ -132,7 +132,7 @@ QGroupBox {
 }
 QGroupBox::title {
     left: 0;
-    padding: 0;
+    padding: 2px 0;
     background-color: lightblue;
     border-radius: 2px;
 }
@@ -157,28 +157,44 @@ QWidget#attributeContainer {
     background-color: white;
 }
 
+QPushButton{
+    height:30px;
+}
+
 QPushButton#importBtn {
-    background-color: yellowgreen;
+    background-color: rgb(74, 194, 70);
 }
 QPushButton#importBtn:hover {
-    background-color: rgb(198, 122, 211); /* 紫色 */
+    background-color: rgb(198, 122, 211);
 }
 QPushButton#importBtn:pressed {
-    background-color: rgb(206, 200, 229);  /* 淡紫色 */
+    background-color: rgb(206, 200, 229); 
 }
 
 QPushButton#exportBtn {
-    background-color: #03A9F4; /* 蓝色 */
+    background-color:rgb(175, 150, 66);
 }
 QPushButton#exportBtn:hover {
-    background-color: #039BE5;
+    background-color:rgb(138, 146, 104);
 }
 QPushButton#exportBtn:pressed {
-    background-color: #0288D1;
+    background-color:rgb(170, 191, 202);
+}
+
+QPushButton#editBtn {
+    background-color: #03A9F4;
+    height:20px;
+}
+QPushButton#editBtn:hover {
+    background-color: rgb(112, 140, 180);
+}
+QPushButton#editBtn:pressed {
+    background-color: rgb(206, 200, 229);
 }
                 
 QPushButton#deleteBtn {
-    background-color: #f44336; /* 红色 */
+    height:20px;
+    background-color: #f44336;
 }
 QPushButton#deleteBtn:hover {
     background-color: rgb(198, 122, 211);
@@ -191,12 +207,12 @@ QLabel#rootNameLabel {
     color: black;
 }
 QPushButton#saveBtn:disabled {
-    background-color: #f0f0f0; /* 灰色 */
+    background-color: #f0f0f0;
 }
 QLineEdit#rootNameInput {
-    border: 1px solid #2196F3; /* 蓝色 */
+    border: 1px solid #2196F3;
     border-radius: 5px;
-    height: 35px;
+    height: 25px;
 }
 
 /* ================ AttributeEditDialog样式 ================ */
@@ -207,8 +223,8 @@ QLineEdit#rootNameInput {
 /* 通用按钮样式 */
 #addValueBtn, #confirmBtn, #cancelBtn {
     border-radius: 5px; 
-    background-color: #2196F3; /* 蓝色 */
-    padding: 10px 20px; /* 上下10px 左右20px */
+    background-color: #2196F3;
+    padding: 0 20px; /* 左右20px */
     font-weight: normal;
 }
 
@@ -217,19 +233,18 @@ QLineEdit#rootNameInput {
     padding: 0px 10px;
 }
 
-/* 红色按钮样式 */
 #cancelBtn {
-    background-color: #f44336; /* 红色 */
+    background-color: #f44336;
     font-weight: normal;
 }
-/* 按钮状态 */
+
 #addValueBtn:disabled, #confirmBtn:disabled {
     background-color: gray;
     color: white;
 }
 
 #nameTitle, #valuesTitle {
-    min-width:70px;
+    width:100px;
     color: black;
     font-weight: normal;
     border: none;
@@ -241,7 +256,7 @@ QLineEdit#rootNameInput {
     border: none;
 }
 #nameInput, #valueInput {
-    border: 1px solid #2196F3; /* 蓝色 */
+    border: 1px solid #2196F3;
     border-radius: 5px;
     padding: 4px;
 }

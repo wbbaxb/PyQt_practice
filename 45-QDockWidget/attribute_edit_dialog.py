@@ -15,6 +15,7 @@ class AttributeEditDialog(QDialog):
         attribute_item: 属性项, 编辑属性时需要传入
         """
         super().__init__(parent=parent)
+        self.label_width = 80
         WindowUtils.center_on_screen(self)
         self.attributes = attributes
         self.mode = mode
@@ -46,6 +47,7 @@ class AttributeEditDialog(QDialog):
 
         # 属性名标题
         name_title = QLabel("属性名称：")
+        name_title.setFixedWidth(self.label_width)
         name_title.setObjectName("nameTitle")
         name_layout.addWidget(name_title)
 
@@ -75,6 +77,7 @@ class AttributeEditDialog(QDialog):
 
         # 属性值标题
         values_title = QLabel("属性值：")
+        values_title.setFixedWidth(self.label_width)
         values_title.setObjectName("valuesTitle")
         values_title.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)  # 左对齐，垂直居中
         values_input_layout.addWidget(values_title)
