@@ -2,21 +2,21 @@ from PyQt5.QtWidgets import (QDialog, QHBoxLayout, QPushButton, QVBoxLayout, QLi
                              QLabel, QLineEdit, QListWidget, QFrame, QMessageBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon
-from customitem_widget import CustomItemWidget
+from Common.customitem_widget import CustomItemWidget
 from Common.utils import WindowUtils
 from Common.StyleManager import StyleManager
 
 
 class AttributeEditDialog(QDialog):
-    def __init__(self, parent=None, mode: int = 0, exits_attributes: list[str] = None, attribute_item: tuple[str, list[str]] = None):
+    def __init__(self, parent=None, mode: int = 0, attributes: dict[str, list[str]] = None, attribute_item: tuple[str, list[str]] = None):
         """
         mode: 0 添加属性 1 编辑属性
-        exits_attributes: 已存在的属性列表, 添加属性时需要传入
+        attributes: 属性列表, 添加属性时需要传入
         attribute_item: 属性项, 编辑属性时需要传入
         """
         super().__init__(parent=parent)
         WindowUtils.center_on_screen(self)
-        self.exits_attributes = exits_attributes
+        self.attributes = attributes
         self.mode = mode
         self.attribute_item = attribute_item
         self.setObjectName("editAttributeDialog")
@@ -52,7 +52,7 @@ class AttributeEditDialog(QDialog):
         name_title.setObjectName("nameTitle")
         name_layout.addWidget(name_title)
 
-        if self.mode == 0 and self.exits_attributes:  # 添加属性
+        if self.mode == 0 and self.attributes:  # 添加属性
             self.name_input = QLineEdit()
             self.name_input.setObjectName("nameInput")
             self.name_input.setPlaceholderText("请输入属性名称")
@@ -135,7 +135,8 @@ class AttributeEditDialog(QDialog):
             return
 
         if value in self.get_all_items():
-            QMessageBox.warning(self, "警告", "该值已存在!", QMessageBox.Ok)
+            QMessageBox.warning(
+                self, "警告", f"属性值：{value} 已存在!", QMessageBox.Ok)
             return
 
         self.add_attribute_value_to_list(value)
@@ -180,18 +181,24 @@ class AttributeEditDialog(QDialog):
 
     def confirm_add_attribute(self) -> tuple[str, list[str]]:
         """确认添加属性"""
+
         attribute_name = self.name_input.text().strip(
         ) if self.mode == 0 else self.name_label.text()
 
-        if not attribute_name:
-            QMessageBox.warning(self, "警告", "请输入属性名!")
-            return
+        if self.mode == 0:
+            if not attribute_name:
+                QMessageBox.warning(self, "警告", "请输入属性名!")
+                return
 
-        if self.exits_attributes and attribute_name in self.exits_attributes:
-            QMessageBox.critical(self, "错误", f'{attribute_name}已存在!')
-            return
+            root_name = next(iter(self.attributes.keys()))
+
+            if self.attributes and attribute_name in self.attributes[root_name]:
+                QMessageBox.critical(
+                    self, "错误", f'属性：{attribute_name} 已存在，请勿重复添加!')
+                return
 
         value_list = self.get_all_items()
+
         if not value_list:
             QMessageBox.warning(self, "警告", "请至少添加一个属性值!")
             return
@@ -203,12 +210,3 @@ class AttributeEditDialog(QDialog):
 
     def cancel(self):
         self.reject()
-
-if __name__ == "__main__":
-    import sys
-    from PyQt5.QtWidgets import QApplication
-
-    app = QApplication(sys.argv)
-    dialog = AttributeEditDialog()
-    dialog.show()
-    sys.exit(app.exec_())
